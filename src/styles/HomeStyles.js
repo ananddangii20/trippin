@@ -60,6 +60,27 @@ export default StyleSheet.create({
     fontWeight: "700",
   },
 
+  authButtons: {
+    width: "100%",
+    gap: 14,
+  },
+
+  secondaryButton: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#DCD3FF",
+    paddingVertical: Math.max(16, height * 0.022),
+    borderRadius: 18,
+    alignItems: "center",
+  },
+
+  secondaryButtonText: {
+    color: "#5B35F2",
+    fontSize: width * 0.045,
+    fontWeight: "700",
+  },
+
   loginText: {
     textAlign: "center",
     fontSize: width * 0.045,

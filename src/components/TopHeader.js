@@ -7,9 +7,20 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 
+import { useAuth } from "../context/AuthContext";
 import styles from "../styles/TripsStyles";
 
 export default function TopHeader() {
+  const { logout } = useAuth();
+
+  async function handleLogout() {
+    try {
+      await logout();
+    } catch (error) {
+      console.log("Logout error:", error);
+    }
+  }
+
   return (
     <View style={styles.header}>
       <Image
@@ -18,9 +29,9 @@ export default function TopHeader() {
       />
 
       <View style={styles.headerIcons}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleLogout}>
           <Ionicons
-            name="notifications-outline"
+            name="log-out-outline"
             size={28}
             color="#222"
           />

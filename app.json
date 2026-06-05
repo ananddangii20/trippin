@@ -7,19 +7,15 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-
     "scheme": "trippin",
-
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-
     "ios": {
       "supportsTablet": true
     },
-
     "android": {
       "package": "com.ananddangi.trippin",
       "adaptiveIcon": {
@@ -28,13 +24,12 @@
       },
       "edgeToEdgeEnabled": true
     },
-
     "web": {
       "favicon": "./assets/favicon.png"
     },
-
     "plugins": [
-      "expo-video"
+      "expo-video",
+      "@react-native-google-signin/google-signin"
     ]
   }
 }

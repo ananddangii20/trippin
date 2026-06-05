@@ -157,9 +157,7 @@ return ( <SafeAreaView style={styles.container}>
     <View style={styles.actionContainer}>
 <TouchableOpacity
   style={styles.actionItem}
-  onPress={() =>
-    navigation.navigate("Photos")
-  }
+ 
 >
         <Ionicons
           name="chatbubble"
