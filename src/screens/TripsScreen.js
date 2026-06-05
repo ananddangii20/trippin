@@ -1,20 +1,95 @@
-import React from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
 import {
-  
   ScrollView,
   Text,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+
 import TopHeader from "../components/TopHeader";
 import TripCard from "../components/TripCard";
 import BottomNavbar from "../components/BottomNavbar";
 
 import styles from "../styles/TripsStyles";
 
+import {
+  collection,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
+
+import {
+  auth,
+  db,
+} from "../services/firebase";
+
 export default function TripsScreen() {
+  const [trips, setTrips] = useState([]);
+
+  const getTripStatus = (
+    startDate,
+    endDate
+  ) => {
+    if (!startDate || !endDate) {
+      return "Upcoming";
+    }
+
+    const today = new Date();
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (today < start) {
+      return "Upcoming";
+    }
+
+    if (
+      today >= start &&
+      today <= end
+    ) {
+      return "Ongoing";
+    }
+
+    return "Expired";
+  };
+
+  useEffect(() => {
+    const q = query(
+      collection(db, "trips"),
+      where(
+        "userId",
+        "==",
+        auth.currentUser.uid
+      )
+    );
+
+    const unsubscribe =
+      onSnapshot(q, (snapshot) => {
+        const data =
+          snapshot.docs.map(
+            (doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            })
+          );
+
+        console.log(data);
+
+        setTrips(data);
+      });
+
+    return unsubscribe;
+  }, []);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={styles.container}
+    >
       <TopHeader />
 
       <Text style={styles.title}>
@@ -22,37 +97,34 @@ export default function TripsScreen() {
       </Text>
 
       <ScrollView
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={
+          false
+        }
       >
-        <TripCard
-  title="Goa Getaway 🌴"
-  date="12 - 16 June, 2026"
+        {trips.map((trip) => (
+<TripCard
+  key={trip.id}
+  destination={trip.destination}
+  date={
+    trip.startDate &&
+    trip.endDate
+      ? `${new Date(
+          trip.startDate
+        ).toLocaleDateString()} - ${new Date(
+          trip.endDate
+        ).toLocaleDateString()}`
+      : "No dates selected"
+  }
+  budget={trip.budget || 0}
+  collected={trip.collected || 0}
+  progress={trip.progress || 0}
+  status={getTripStatus(
+    trip.startDate,
+    trip.endDate
+  )}
   image={require("../../assets/images/trip1.png")}
-  status="Upcoming"
-  budget={60000}
-  collected={45000}
-  progress={75}
 />
-
-<TripCard
-  title="Kasol Trek 🏔️"
-  date="2 - 6 July, 2026"
-  image={require("../../assets/images/trip2.png")}
-  status="Upcoming"
-  budget={25000}
-  collected={18000}
-  progress={72}
-/>
-
-<TripCard
-  title="Manali Roadtrip 🚗"
-  date="5 - 9 Aug, 2026"
-  image={require("../../assets/images/trip3.png")}
-  status="Upcoming"
-  budget={40000}
-  collected={30000}
-  progress={75}
-/>
+        ))}
       </ScrollView>
 
       <BottomNavbar />

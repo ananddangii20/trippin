@@ -5,9 +5,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../screens/HomeScreen";
 import LoginScreen from "../screens/LoginScreen";
 import SignupScreen from "../screens/SignupScreen";
+
 import TripsScreen from "../screens/TripsScreen";
 import TripDetailsScreen from "../screens/TripDetailsScreen";
 import PhotosScreen from "../screens/PhotosScreen";
+import CreateTripScreen from "../screens/CreateTripScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 
 import { useAuth } from "../context/AuthContext";
 
@@ -55,6 +58,17 @@ export default function AppNavigator() {
           <Stack.Screen
             name="Photos"
             component={PhotosScreen}
+          />
+
+          <Stack.Screen
+            name="CreateTrip"
+            component={CreateTripScreen}
+          />
+
+          {/* ADD HERE */}
+          <Stack.Screen
+            name="Profile"
+            component={ProfileScreen}
           />
         </>
       ) : (

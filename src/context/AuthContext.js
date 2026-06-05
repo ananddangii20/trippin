@@ -16,11 +16,24 @@ import {
   updateProfile,
 } from "@firebase/auth";
 
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  getFirestore,
+  limit,
+} from "firebase/firestore";
+
+import { app } from "../services/firebase";
+
 import { auth } from "../services/firebase";
+
 import {
   getUserDetails,
   saveUserDetails,
 } from "../services/userDatabase";
+const db = getFirestore(app);
 
 const AuthContext = createContext(null);
 
@@ -68,70 +81,169 @@ export function AuthProvider({ children }) {
     () => ({
       user,
       initializing,
-      login: async (email, password) => {
-        authActionInProgress.current = true;
+      login: async (
+  identifier,
+  password
+) => {
+  authActionInProgress.current = true;
 
-        try {
-          const credential =
-            await signInWithEmailAndPassword(
-            auth,
-            email.trim(),
-            password
+  try {
+    let email = identifier.trim();
+
+    if (!identifier.includes("@")) {
+      const q = query(
+        collection(db, "users"),
+        where(
+          "username",
+          "==",
+          identifier
+            .trim()
+            .toLowerCase()
+        )
+      );
+
+      const snapshot =
+        await getDocs(q);
+
+      if (snapshot.empty) {
+        const error =
+          new Error(
+            "Username not found."
           );
-          const userDetails = await getUserDetails(
-            credential.user.uid
-          );
 
-          if (!userDetails) {
-            await signOut(auth);
-            const error = new Error(
-              "No saved user data found. Please create an account first."
-            );
-            error.code = "auth/user-data-not-found";
-            throw error;
-          }
+        error.code =
+          "auth/user-not-found";
 
-          await saveUserDetails(credential.user, {
-            email,
-            provider: "password",
-          });
-          setUser(credential.user);
+        throw error;
+      }
 
-          return credential;
-        } finally {
-          authActionInProgress.current = false;
+      email =
+        snapshot.docs[0].data()
+          .email;
+    }
+
+    const credential =
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+    const userDetails =
+      await getUserDetails(
+        credential.user.uid
+      );
+
+    if (!userDetails) {
+      await signOut(auth);
+
+      const error =
+        new Error(
+          "No saved user data found."
+        );
+
+      error.code =
+        "auth/user-data-not-found";
+
+      throw error;
+    }
+
+    await saveUserDetails(
+      credential.user,
+      {
+        email,
+        provider:
+          "password",
+      }
+    );
+
+    setUser(
+      credential.user
+    );
+
+    return credential;
+  } finally {
+    authActionInProgress.current =
+      false;
+  }
+},
+
+signup: async (
+  username,
+  email,
+  password
+) => {
+  authActionInProgress.current = true;
+
+  try {
+    const credential =
+      await createUserWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
+
+    const cleanUsername =
+      username
+        .trim()
+        .toLowerCase();
+        const usernameQuery = query(
+  collection(db, "users"),
+  where(
+    "username",
+    "==",
+    cleanUsername
+  ),
+  limit(1)
+);
+
+const usernameSnapshot =
+  await getDocs(usernameQuery);
+
+if (!usernameSnapshot.empty) {
+  const error = new Error(
+    "Username already taken."
+  );
+
+  error.code =
+    "auth/username-already-in-use";
+
+  throw error;
+}
+
+    if (cleanUsername) {
+      await updateProfile(
+        credential.user,
+        {
+          displayName:
+            cleanUsername,
         }
-      },
-      signup: async (name, email, password) => {
-        authActionInProgress.current = true;
+      );
+    }
 
-        try {
-          const credential =
-            await createUserWithEmailAndPassword(
-              auth,
-              email.trim(),
-              password
-            );
+    await saveUserDetails(
+      credential.user,
+      {
+        username:
+          cleanUsername,
+        email,
+        provider:
+          "password",
+        isNewUser: true,
+      }
+    );
 
-          if (name.trim()) {
-            await updateProfile(credential.user, {
-              displayName: name.trim(),
-            });
-          }
+    setUser(
+      credential.user
+    );
 
-          await saveUserDetails(credential.user, {
-            name,
-            email,
-            provider: "password",
-            isNewUser: true,
-          });
-          setUser(credential.user);
+    return credential;
+  } finally {
+    authActionInProgress.current =
+      false;
+  }
+},
 
-          return credential;
-        } finally {
-          authActionInProgress.current = false;
-        }
-      },
       loginWithGoogleToken: async (idToken) => {
         authActionInProgress.current = true;
 

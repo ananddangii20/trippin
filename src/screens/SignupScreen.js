@@ -17,7 +17,7 @@ import styles from "../styles/AuthStyles";
 
 export default function SignupScreen({ navigation }) {
   const { signup, loginWithGoogleToken, user } = useAuth();
-  const [name, setName] = useState("");
+const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -35,10 +35,12 @@ export default function SignupScreen({ navigation }) {
   async function handleSignup() {
     setError("");
 
-    if (!name || !email || !password) {
-      setError("Enter your name, email, and password.");
-      return;
-    }
+   if (!username || !email || !password) {
+  setError(
+    "Enter your username, email, and password."
+  );
+  return;
+}
 
     if (password.length < 6) {
       setError(
@@ -49,7 +51,7 @@ export default function SignupScreen({ navigation }) {
 
     try {
       setLoading(true);
-      await signup(name, email, password);
+   await signup(username, email, password);
     } catch (authError) {
       setError(getAuthMessage(authError));
     } finally {
@@ -108,13 +110,19 @@ export default function SignupScreen({ navigation }) {
           </Text>
 
           <View style={styles.form}>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="Full name"
-              autoCapitalize="words"
-            />
+           <TextInput
+  style={styles.input}
+  value={username}
+  onChangeText={(text) =>
+    setUsername(
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9._]/g, "")
+    )
+  }
+  placeholder="Username"
+  autoCapitalize="none"
+/>
 
             <TextInput
               style={styles.input}
@@ -205,6 +213,8 @@ function getAuthMessage(error) {
       return "Enter a valid email address.";
     case "auth/weak-password":
       return "Password should be at least 6 characters.";
+      case "auth/username-already-in-use":
+  return "Username already taken.";
     default:
       return error?.message || "Signup failed.";
   }

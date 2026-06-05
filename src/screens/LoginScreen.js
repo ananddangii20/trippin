@@ -17,7 +17,8 @@ import styles from "../styles/AuthStyles";
 
 export default function LoginScreen({ navigation }) {
   const { login, loginWithGoogleToken, user } = useAuth();
-  const [email, setEmail] = useState("");
+const [identifier, setIdentifier] =
+  useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,14 +35,16 @@ export default function LoginScreen({ navigation }) {
   async function handleLogin() {
     setError("");
 
-    if (!email || !password) {
-      setError("Enter your email and password.");
-      return;
-    }
+   if (!identifier || !password) {
+  setError(
+    "Enter username/email and password."
+  );
+  return;
+}
 
     try {
       setLoading(true);
-      await login(email, password);
+   await login(identifier, password);
     } catch (authError) {
       setError(getAuthMessage(authError));
     } finally {
@@ -98,14 +101,13 @@ export default function LoginScreen({ navigation }) {
           </Text>
 
           <View style={styles.form}>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Email"
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
+      <TextInput
+  style={styles.input}
+  value={identifier}
+  onChangeText={setIdentifier}
+  placeholder="Username or Email"
+  autoCapitalize="none"
+/>
 
             <TextInput
               style={styles.input}

@@ -4,6 +4,11 @@ import {
   getReactNativePersistence,
   initializeAuth,
 } from "@firebase/auth";
+
+import {
+  getFirestore,
+} from "firebase/firestore";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
@@ -13,7 +18,7 @@ const firebaseConfig = {
   storageBucket: "trippin-5046a.firebasestorage.app",
   messagingSenderId: "439204702970",
   appId: "1:439204702970:web:b00b660b00adc9558e3743",
-  measurementId: "G-YLDVJC0VGR",
+  measurementId: "G-YLDVJC0VGR"
 };
 
 export const app =
@@ -25,10 +30,14 @@ let auth;
 
 try {
   auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
+    persistence: getReactNativePersistence(
+      AsyncStorage
+    ),
   });
-} catch (error) {
+} catch {
   auth = getAuth(app);
 }
 
 export { auth };
+
+export const db = getFirestore(app);

@@ -37,8 +37,8 @@ export async function saveUserDetails(user, details = {}) {
   const userRef = doc(db, "users", user.uid);
   const userDetails = {
     uid: user.uid,
-    name:
-      details.name ||
+    username:
+      details.username ||
       user.displayName ||
       "",
     email: user.email || details.email || "",
