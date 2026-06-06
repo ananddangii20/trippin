@@ -11,7 +11,9 @@ import TripDetailsScreen from "../screens/TripDetailsScreen";
 import PhotosScreen from "../screens/PhotosScreen";
 import CreateTripScreen from "../screens/CreateTripScreen";
 import ProfileScreen from "../screens/ProfileScreen";
-
+import ChatScreen from "../screens/ChatScreen";
+import AddMembersScreen from "../screens/AddMembersScreen";
+import ViewMembersScreen from "../screens/ViewMembersScreen";
 import { useAuth } from "../context/AuthContext";
 
 const Stack = createNativeStackNavigator();
@@ -60,16 +62,28 @@ export default function AppNavigator() {
             component={PhotosScreen}
           />
 
-          <Stack.Screen
-            name="CreateTrip"
-            component={CreateTripScreen}
-          />
+         <Stack.Screen
+  name="CreateTrip"
+  component={CreateTripScreen}
+/>
 
-          {/* ADD HERE */}
-          <Stack.Screen
-            name="Profile"
-            component={ProfileScreen}
-          />
+<Stack.Screen
+  name="Chat"
+  component={ChatScreen}
+/>
+
+<Stack.Screen
+  name="Profile"
+  component={ProfileScreen}
+/>
+<Stack.Screen
+  name="AddMembers"
+  component={AddMembersScreen}
+/>
+<Stack.Screen
+  name="ViewMembers"
+  component={ViewMembersScreen}
+/>
         </>
       ) : (
         <>

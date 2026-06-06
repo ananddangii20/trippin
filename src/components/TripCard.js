@@ -16,7 +16,8 @@ import { useNavigation } from "@react-navigation/native";
 import styles from "../styles/TripsStyles";
 
 export default function TripCard({
-
+  tripId,
+   creatorId,
   destination,
   date,
   image,
@@ -100,19 +101,21 @@ export default function TripCard({
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() =>
-        navigation.navigate(
-          "TripDetails",
-          {
-            title:destination,
-            destination,
-            date,
-            image,
-            status,
-            budget,
-            collected,
-            progress,
-          }
-        )
+       navigation.navigate(
+  "TripDetails",
+  {
+    tripId,
+     creatorId,
+    title: destination,
+    destination,
+    date,
+    image,
+    status,
+    budget,
+    collected,
+    progress,
+  }
+)
       }
     >
       <ImageBackground

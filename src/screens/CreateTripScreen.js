@@ -96,25 +96,34 @@ export default function CreateTripScreen({
     }
 
     try {
-      await addDoc(
-        collection(db, "trips"),
-        {
-          
-          destination,
-          budget: Number(budget),
-          collected: 0,
-          progress: 0,
-          startDate:
-            startDate.toISOString(),
-          endDate:
-            endDate.toISOString(),
-          status: getStatus(),
-          userId:
-            auth.currentUser?.uid,
-          createdAt:
-            serverTimestamp(),
-        }
-      );
+     await addDoc(
+  collection(db, "trips"),
+  {
+    title: destination,
+    destination,
+    budget: Number(budget),
+    collected: 0,
+    progress: 0,
+
+    startDate:
+      startDate.toISOString(),
+
+    endDate:
+      endDate.toISOString(),
+
+    status: getStatus(),
+
+    userId:
+      auth.currentUser.uid,
+
+    members: [
+      auth.currentUser.uid,
+    ],
+
+    createdAt:
+      serverTimestamp(),
+  }
+);
 
       Alert.alert(
         "Success",

@@ -60,13 +60,13 @@ export default function TripsScreen() {
 
   useEffect(() => {
     const q = query(
-      collection(db, "trips"),
-      where(
-        "userId",
-        "==",
-        auth.currentUser.uid
-      )
-    );
+  collection(db, "trips"),
+  where(
+    "members",
+    "array-contains",
+    auth.currentUser.uid
+  )
+);
 
     const unsubscribe =
       onSnapshot(q, (snapshot) => {
@@ -104,6 +104,8 @@ export default function TripsScreen() {
         {trips.map((trip) => (
 <TripCard
   key={trip.id}
+    creatorId={trip.userId}
+  tripId={trip.id}
   destination={trip.destination}
   date={
     trip.startDate &&

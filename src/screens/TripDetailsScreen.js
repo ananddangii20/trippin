@@ -15,53 +15,141 @@ import { Ionicons } from "@expo/vector-icons";
 
 import styles from "../styles/TripDetailsStyles";
 import BottomNavbar from "../components/BottomNavbar";
+import { useAuth } from "../context/AuthContext";
+import {
+  Alert,
+} from "react-native";
 
+import {
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+
+import {
+  db,
+} from "../services/firebase";
 export default function TripDetailsScreen({
-route,
-navigation,
+  route,
+  navigation,
 }) {
+
+const { user } = useAuth();
+
 const {
-title = "Trip",
-date = "",
-image,
-budget = 0,
-collected = 0,
-progress = 0,
+  tripId,
+  creatorId,
+  title = "Trip",
+  date = "",
+  image,
+  budget = 0,
+  collected = 0,
+  progress = 0,
 } = route.params || {};
 
+const deleteTrip = () => {
+  Alert.alert(
+    "Delete Group",
+    "Are you sure you want to delete this group?",
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deleteDoc(
+              doc(
+                db,
+                "trips",
+                tripId
+              )
+            );
+
+            navigation.navigate(
+              "Trips"
+            );
+          } catch (e) {
+            Alert.alert(
+              "Error",
+              e.message
+            );
+          }
+        },
+      },
+    ]
+  );
+};
 return ( <SafeAreaView style={styles.container}>
 {/* Header */}
 
 
   <View style={styles.header}>
-    <TouchableOpacity
-      onPress={() => navigation.goBack()}
-    >
-      <Ionicons
-        name="chevron-back"
-        size={28}
-        color="#222"
-      />
-    </TouchableOpacity>
 
-    <View style={styles.headerCenter}>
-      <Text style={styles.title}>
-        {title}
-      </Text>
+  <TouchableOpacity
+    onPress={() => navigation.goBack()}
+  >
+    <Ionicons
+      name="chevron-back"
+      size={28}
+      color="#222"
+    />
+  </TouchableOpacity>
 
-      <Text style={styles.date}>
-        {date}
-      </Text>
-    </View>
+  <View style={styles.headerCenter}>
+    <Text style={styles.title}>
+      {title}
+    </Text>
 
-    <TouchableOpacity>
-      <Ionicons
-        name="ellipsis-vertical"
-        size={24}
-        color="#222"
-      />
-    </TouchableOpacity>
+    <Text style={styles.date}>
+      {date}
+    </Text>
   </View>
+
+  <View
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+    }}
+  >
+
+   <TouchableOpacity
+  onPress={() =>
+    navigation.navigate(
+      "ViewMembers",
+      {
+        tripId,
+      }
+    )
+  }
+>
+  <Ionicons
+    name="people"
+    size={24}
+    color="#222"
+  />
+</TouchableOpacity>
+    {
+      user?.uid === creatorId && (
+
+      <TouchableOpacity
+        onPress={deleteTrip}
+      >
+        <Ionicons
+          name="trash"
+          size={24}
+          color="red"
+        />
+      </TouchableOpacity>
+
+      )
+    }
+
+  </View>
+
+</View>
 
   <ScrollView
     showsVerticalScrollIndicator={false}
@@ -155,9 +243,42 @@ return ( <SafeAreaView style={styles.container}>
     {/* Quick Actions */}
 
     <View style={styles.actionContainer}>
+     {
+user?.uid === creatorId && (
+
 <TouchableOpacity
   style={styles.actionItem}
- 
+  onPress={() =>
+    navigation.navigate(
+      "AddMembers",
+      {
+        tripId,
+      }
+    )
+  }
+>
+  <Ionicons
+    name="person-add"
+    size={26}
+    color="#ff2b2b"
+  />
+
+  <Text style={styles.actionText}>
+    Members
+  </Text>
+
+</TouchableOpacity>
+
+)
+}
+<TouchableOpacity
+  style={styles.actionItem}
+  onPress={() =>
+    navigation.navigate("Chat", {
+      tripId: tripId,
+      tripName: title,
+    })
+  }
 >
         <Ionicons
           name="chatbubble"
