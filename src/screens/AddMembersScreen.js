@@ -10,15 +10,22 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  Modal,
 } from "react-native";
 
 import {
   collection,
   onSnapshot,
   doc,
+   getDoc,
   updateDoc,
   arrayUnion,
 } from "firebase/firestore";
+import styles from "../styles/AddMembersStyles";
+
+import { Ionicons } from "@expo/vector-icons";
+
+import { Image } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -36,6 +43,17 @@ export default function AddMembersScreen({
 
   const [search, setSearch] =
     useState("");
+
+    const [members, setMembers] =
+  useState([]);
+
+const [modalVisible,
+setModalVisible] =
+  useState(false);
+
+const [selectedUser,
+setSelectedUser] =
+  useState("");
 
   useEffect(() => {
     const unsubscribe =
@@ -59,6 +77,30 @@ export default function AddMembersScreen({
     return unsubscribe;
   }, []);
 
+
+  useEffect(() => {
+  const unsubscribe =
+    onSnapshot(
+      doc(
+        db,
+        "trips",
+        tripId
+      ),
+      (snapshot) => {
+        if (
+          snapshot.exists()
+        ) {
+          setMembers(
+            snapshot.data()
+              .members || []
+          );
+        }
+      }
+    );
+
+  return unsubscribe;
+}, []);
+
   const addMember =
     async (user) => {
       try {
@@ -76,11 +118,13 @@ export default function AddMembersScreen({
           }
         );
 
-        Alert.alert(
-          "Success",
-          user.username +
-            " added"
-        );
+      setSelectedUser(
+  user.username
+);
+
+setModalVisible(
+  true
+); 
       } catch (e) {
         Alert.alert(
           "Error",
@@ -100,86 +144,207 @@ export default function AddMembersScreen({
     );
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        padding: 15,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 24,
-          fontWeight: "700",
-          marginBottom: 15,
-        }}
-      >
-        Add Members
-      </Text>
+    <SafeAreaView style={styles.container}>
 
-      <TextInput
-        placeholder="Search username"
-        value={search}
-        onChangeText={
-          setSearch
-        }
-        style={{
-          borderWidth: 1,
-          borderColor:
-            "#ddd",
-          borderRadius: 12,
-          padding: 12,
-          marginBottom: 15,
-        }}
-      />
+<View style={styles.header}>
 
-      <FlatList
-        data={filtered}
-        keyExtractor={(
-          item
-        ) => item.id}
-        renderItem={({
-          item,
-        }) => (
-          <TouchableOpacity
-            style={{
-              flexDirection:
-                "row",
-              justifyContent:
-                "space-between",
-              padding: 15,
-              borderBottomWidth: 1,
-              borderBottomColor:
-                "#eee",
-            }}
-            onPress={() =>
-              addMember(
-                item
-              )
-            }
-          >
-            <Text
-              style={{
-                fontSize: 16,
-              }}
-            >
-              {
-                item.username
-              }
-            </Text>
+  <TouchableOpacity
+    style={styles.backButton}
+    onPress={() =>
+      navigation.goBack()
+    }
+  >
+    <Ionicons
+      name="chevron-back"
+      size={24}
+      color="#111"
+    />
+  </TouchableOpacity>
 
-            <Text
-              style={{
-                color:
-                  "#7C4DFF",
-                fontWeight:
-                  "700",
-              }}
-            >
-              Add
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
-    </SafeAreaView>
+  <View>
+    <Text style={styles.title}>
+      Add Members
+    </Text>
+
+    <Text style={styles.subtitle}>
+      Invite friends to this trip
+    </Text>
+  </View>
+
+</View>
+
+<View style={styles.searchBox}>
+<Ionicons
+name="search"
+size={20}
+color="#888"
+/>
+
+<TextInput
+placeholder="Search username"
+value={search}
+onChangeText={setSearch}
+style={styles.input}
+/>
+</View>
+
+<FlatList
+data={filtered}
+keyExtractor={(item)=>item.id}
+renderItem={({item})=>(
+
+<TouchableOpacity
+style={styles.card}
+onPress={()=>
+addMember(item)
+}
+>
+
+<View style={styles.left}>
+
+<Image
+source={{
+uri:
+item.photoURL ||
+"https://ui-avatars.com/api/?name="+
+item.username
+}}
+style={styles.avatar}
+/>
+
+<View style={styles.info}>
+<Text style={styles.username}>
+{item.username}
+</Text>
+
+<Text style={styles.bio}>
+Trip Member
+</Text>
+</View>
+
+</View>
+
+{
+members.includes(
+item.uid
+)
+
+?
+
+<View
+style={
+styles.addedButton
+}
+>
+<Text
+style={
+styles.addedText
+}
+>
+Added ✓
+</Text>
+</View>
+
+:
+
+<TouchableOpacity
+style={
+styles.addButton
+}
+onPress={()=>
+addMember(
+item
+)
+}
+>
+
+<Text
+style={
+styles.addText
+}
+>
+Add
+</Text>
+
+</TouchableOpacity>
+
+}
+
+</TouchableOpacity>
+
+)}
+/>
+
+<Modal
+visible={
+modalVisible
+}
+transparent
+animationType="fade"
+>
+
+<View
+style={
+styles.modalOverlay
+}
+>
+
+<View
+style={
+styles.modalCard
+}
+>
+
+<Ionicons
+name="checkmark-circle"
+size={75}
+color="#7C4DFF"
+/>
+
+<Text
+style={
+styles.modalTitle
+}
+>
+Added Successfully
+</Text>
+
+<Text
+style={
+styles.modalSubtitle
+}
+>
+{selectedUser}
+ joined the trip.
+</Text>
+
+<TouchableOpacity
+style={
+styles.modalButton
+}
+onPress={()=>
+setModalVisible(
+false
+)
+}
+>
+
+<Text
+style={
+styles.modalButtonText
+}
+>
+Done
+</Text>
+
+</TouchableOpacity>
+
+</View>
+
+</View>
+
+</Modal>
+
+</SafeAreaView>
   );
 }

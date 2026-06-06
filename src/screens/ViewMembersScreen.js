@@ -13,7 +13,7 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import styles from "../styles/ViewMembersStyles";
 import { Ionicons } from "@expo/vector-icons";
 
 import {
@@ -114,7 +114,7 @@ export default function ViewMembersScreen({
     ) => {
       Alert.alert(
         "Remove Member",
-        "Remove this member?",
+        "Are you sure you want to remove this member from the trip?",
         [
           {
             text:
@@ -148,55 +148,57 @@ export default function ViewMembersScreen({
 
   return (
     <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor:
-          "#fff",
-      }}
-    >
-      <View
-        style={{
-          flexDirection:
-            "row",
-          alignItems:
-            "center",
-          padding: 20,
-        }}
-      >
-        <TouchableOpacity
-          onPress={() =>
-            navigation.goBack()
-          }
-        >
-          <Ionicons
-            name="chevron-back"
-            size={28}
-          />
-        </TouchableOpacity>
+  style={styles.container}
+>
+     <View style={styles.header}>
 
-        <Text
-          style={{
-            fontSize: 22,
-            fontWeight:
-              "700",
-            marginLeft: 15,
-          }}
-        >
-          Members
-        </Text>
-      </View>
+<TouchableOpacity
+style={styles.backButton}
+onPress={()=>
+navigation.goBack()
+}
+>
 
-      <Text
-        style={{
-          marginLeft: 20,
-          marginBottom: 15,
-          color: "#666",
-        }}
-      >
-        {members.length}
-        {" "}
-        Members
-      </Text>
+<Ionicons
+name="chevron-back"
+size={24}
+color="#111"
+/>
+
+</TouchableOpacity>
+
+<View
+style={
+styles.headerText
+}
+>
+
+<Text
+style={
+styles.title
+}
+>
+Members
+</Text>
+
+<Text
+style={
+styles.subtitle
+}
+>
+Group participants
+</Text>
+
+</View>
+
+</View>
+
+    <Text style={styles.memberCount}>
+{members.length}
+ {members.length === 1
+ ? " Member"
+ : " Members"}
+</Text>
 
       <FlatList
         data={
@@ -207,97 +209,129 @@ export default function ViewMembersScreen({
         ) =>
           item.uid
         }
+
+        ListEmptyComponent={
+<View
+style={styles.emptyContainer}
+>
+
+<Ionicons
+name="people-outline"
+size={70}
+color="#BBB"
+/>
+
+<Text
+style={styles.emptyTitle}
+>
+No Members
+</Text>
+
+<Text
+style={styles.emptySubtitle}
+>
+Invite friends to
+join this trip.
+</Text>
+
+</View>
+}
         renderItem={({
           item,
         }) => (
-          <View
-            style={{
-              flexDirection:
-                "row",
-              alignItems:
-                "center",
-              justifyContent:
-                "space-between",
-              padding: 16,
-              borderBottomWidth: 1,
-              borderBottomColor:
-                "#eee",
-            }}
-          >
-            <View
-              style={{
-                flexDirection:
-                  "row",
-                alignItems:
-                  "center",
-              }}
-            >
-              <Image
-                source={{
-                  uri:
-                    item.photoURL ||
-                    "https://ui-avatars.com/api/?name=" +
-                      item.username,
-                }}
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 25,
-                  marginRight: 15,
-                }}
-              />
+         <View
+style={
+styles.memberCard
+}
+>
 
-              <View>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight:
-                      "600",
-                  }}
-                >
-                  {
-                    item.username
-                  }
-                </Text>
+<View
+style={
+styles.leftSection
+}
+>
 
-                {
-                  item.uid ===
-                    creatorId && (
-                    <Text
-                      style={{
-                        color:
-                          "#7C4DFF",
-                      }}
-                    >
-                      👑
-                      Admin
-                    </Text>
-                  )
-                }
-              </View>
-            </View>
+<Image
+source={{
+uri:
+item.photoURL ||
+"https://ui-avatars.com/api/?name="+
+item.username
+}}
+style={
+styles.avatar
+}
+/>
 
-            {
-              user.uid ===
-                creatorId &&
-                item.uid !==
-                  creatorId && (
-                  <TouchableOpacity
-                    onPress={() =>
-                      removeMember(
-                        item.uid
-                      )
-                    }
-                  >
-                    <Ionicons
-                      name="trash"
-                      size={22}
-                      color="red"
-                    />
-                  </TouchableOpacity>
-                )
-            }
-          </View>
+<View
+style={
+styles.info
+}
+>
+
+<Text
+style={
+styles.username
+}
+>
+{
+item.uid ===
+user.uid
+?
+`${item.username} (You)`
+:
+item.username
+}
+</Text>
+
+{
+item.uid ===
+creatorId && (
+
+<Text
+style={
+styles.adminText
+}
+>
+Group Admin
+</Text>
+
+)
+}
+
+</View>
+
+</View>
+
+{
+user.uid ===
+creatorId &&
+item.uid !==
+creatorId && (
+
+<TouchableOpacity
+style={
+styles.removeButton
+}
+onPress={()=>
+removeMember(
+item.uid
+)
+}
+>
+
+<Ionicons
+name="trash"
+size={20}
+color="#FF4D4F"
+/>
+
+</TouchableOpacity>
+
+)
+}
+
+</View>
         )}
       />
     </SafeAreaView>

@@ -12,6 +12,9 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,6 +22,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 import {
+      doc,
+  updateDoc,
   addDoc,
   collection,
   onSnapshot,
@@ -31,6 +36,11 @@ import { db } from "../services/firebase";
 import { useAuth } from "../context/AuthContext";
 
 import styles from "../styles/ChatStyles";
+
+import {
+PanGestureHandler,
+State,
+} from "react-native-gesture-handler";
 
 export default function ChatScreen({
   route,
@@ -49,6 +59,9 @@ const {
 
   const [messages, setMessages] =
     useState([]);
+
+const [replyTo, setReplyTo] =
+  useState(null);
 
   const flatListRef = useRef();
 
@@ -106,48 +119,142 @@ const {
           "chats"
         ),
         {
-          text: message,
-          senderId:
-            user.uid,
-          senderName:
-            user.displayName ||
-            "User",
-          createdAt:
-            serverTimestamp(),
-        }
+
+text:message,
+
+senderId:user.uid,
+
+senderName:
+user.displayName ||
+"User",
+
+createdAt:
+serverTimestamp(),
+
+deleted:false,
+
+replyTo:
+
+replyTo
+
+?
+
+{
+
+text:
+replyTo.text,
+
+senderName:
+replyTo.senderName,
+
+}
+
+:
+
+null,
+
+}
+
       );
 
       setMessage("");
+      setReplyTo(
+null
+);
+      
     };
 
-  const renderItem = ({
-    item,
-  }) => {
-    const mine =
-      item.senderId ===
-      user.uid;
+    const unsendMessage = async (id) => {
+  await updateDoc(
+    doc(
+      db,
+      "trips",
+      tripId,
+      "chats",
+      id
+    ),
+    {
+      deleted: true,
+      text: "",
+    }
+  );
+};
 
-    return (
-      <View
-        style={[
-          styles.messageContainer,
-          mine
-            ? styles.right
-            : styles.left,
-        ]}
+  const renderItem = ({ item }) => {
+  const mine =
+    item.senderId ===
+    user.uid;
+
+return (
+
+<PanGestureHandler
+activeOffsetX={[-80, 80]}
+failOffsetY={[-20, 20]}
+onHandlerStateChange={(e) => {
+
+  if (
+    e.nativeEvent.state === State.END &&
+    Math.abs(
+      e.nativeEvent.translationX
+    ) > 80
+  ) {
+    setReplyTo(item);
+  }
+
+}}
+>
+
+<View
+
+style={[
+
+styles.messageContainer,
+
+mine
+?
+styles.right
+:
+styles.left,
+
+]}
+
+>
+      {!mine && (
+        <Text
+          style={styles.username}
+        >
+          {item.senderName}
+        </Text>
+      )}
+
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onLongPress={() => {
+          if (
+            item.senderId ===
+            user.uid
+          ) {
+           Alert.alert(
+  "Message",
+  "Choose an action",
+  [
+    {
+      text: "Cancel",
+      style: "cancel",
+    },
+    {
+      text: "Unsend",
+      style: "destructive",
+      onPress: () =>
+        unsendMessage(
+          item.id
+        ),
+    },
+  ]
+);
+          }
+        }}
       >
-        {!mine && (
-          <Text
-            style={
-              styles.username
-            }
-          >
-            {
-              item.senderName
-            }
-          </Text>
-        )}
-
         <View
           style={[
             styles.bubble,
@@ -156,17 +263,116 @@ const {
               : styles.otherBubble,
           ]}
         >
+
+            {
+item.replyTo && (
+
+<View
+style={{
+
+backgroundColor:
+mine
+? "rgba(255,255,255,0.15)"
+: "#ECECEC",
+
+padding:8,
+
+borderRadius:10,
+
+marginBottom:8,
+
+}}
+>
+
+<Text
+style={{
+fontWeight:"700",
+color:"#7C4DFF",
+marginBottom:5,
+}}
+>
+
+↩ Replying to
+{" "}
+{replyTo?.senderName}
+
+</Text>
+
+<Text
+numberOfLines={1}
+
+style={{
+
+fontSize:12,
+
+color:
+mine
+? "#F5F5F5"
+: "#555",
+
+}}
+
+>
+
+{item.replyTo?.text}
+
+</Text>
+
+</View>
+
+)
+}
+       <Text
+  style={[
+    styles.messageText,
+
+    mine
+      ? styles.myMessage
+      : styles.otherMessage,
+
+    item.deleted && {
+      fontStyle: "italic",
+      opacity: 0.7,
+    },
+  ]}
+>
+            {item.deleted
+              ? mine
+                ? "You unsent a message"
+                : "This message was unsent"
+              : item.text}
+          </Text>
+
           <Text
-            style={
-              styles.messageText
-            }
+            style={[
+              styles.time,
+              mine
+                ? styles.myTime
+                : styles.otherTime,
+            ]}
           >
-            {item.text}
+            {item.createdAt
+              ? item.createdAt
+                  .toDate()
+                  .toLocaleTimeString(
+                    [],
+                    {
+                      hour:
+                        "2-digit",
+                      minute:
+                        "2-digit",
+                    }
+                  )
+              : ""}
           </Text>
         </View>
-      </View>
-    );
-  };
+      </TouchableOpacity>
+    </View>
+
+    </PanGestureHandler>
+  );
+};
+
 
   return (
     <SafeAreaView
@@ -205,52 +411,132 @@ const {
         />
       </View>
 
-      <KeyboardAvoidingView
-        style={{
-          flex: 1,
-        }}
-        behavior={
-          Platform.OS ===
-          "ios"
-            ? "padding"
-            : null
-        }
-      >
-        <FlatList
-          ref={
-            flatListRef
-          }
-          data={
-            messages
-          }
-          renderItem={
-            renderItem
-          }
-          keyExtractor={(
-            item
-          ) => item.id}
-          contentContainerStyle={{
-            padding: 15,
-          }}
-        />
+ <KeyboardAvoidingView
+  style={{ flex: 1 }}
+  behavior={
+    Platform.OS === "ios"
+      ? "padding"
+      : "height"
+  }
+  keyboardVerticalOffset={
+    Platform.OS === "ios"
+      ? 90
+      : 20
+  }
+>
+      <FlatList
+  ref={flatListRef}
+  data={messages}
+  renderItem={renderItem}
+  keyExtractor={(item) => item.id}
 
+  keyboardShouldPersistTaps="handled"
+  nestedScrollEnabled={true}
+  showsVerticalScrollIndicator={false}
+
+  contentContainerStyle={{
+    padding: 15,
+    paddingBottom: 20,
+  }}
+
+  onContentSizeChange={() =>
+    flatListRef.current?.scrollToEnd({
+      animated: true,
+    })
+  }
+/>
+
+{
+replyTo && (
+
+<View
+style={{
+
+backgroundColor:"#F3F4F6",
+
+marginHorizontal:10,
+
+padding:12,
+
+borderRadius:12,
+
+marginBottom:8,
+
+}}
+>
+
+<Text
+style={{
+
+fontWeight:"700",
+
+color:"#7C4DFF",
+
+}}
+>
+
+Replying to
+{replyTo.senderName}
+
+</Text>
+
+<Text
+numberOfLines={1}
+>
+
+{replyTo.text}
+
+</Text>
+
+<TouchableOpacity
+
+style={{
+
+position:"absolute",
+
+right:10,
+
+top:10,
+
+}}
+
+onPress={()=>
+setReplyTo(
+null
+)
+}
+
+>
+
+<Ionicons
+name="close"
+size={20}
+/>
+
+</TouchableOpacity>
+
+</View>
+
+)
+}
         <View
           style={
             styles.inputRow
           }
         >
-          <TextInput
-            style={
-              styles.input
-            }
-            value={
-              message
-            }
-            onChangeText={
-              setMessage
-            }
-            placeholder="Type a message..."
-          />
+         <TextInput
+style={styles.input}
+value={message}
+onChangeText={setMessage}
+placeholder="Message..."
+multiline
+returnKeyType="send"
+onSubmitEditing={()=>{
+if(message.trim()){
+sendMessage();
+}
+}}
+/>
 
           <TouchableOpacity
             style={
