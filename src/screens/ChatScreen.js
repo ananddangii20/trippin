@@ -12,8 +12,6 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
-  TouchableWithoutFeedback,
   Alert,
 } from "react-native";
 
@@ -22,7 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 import {
-      doc,
+  doc,
   updateDoc,
   addDoc,
   collection,
@@ -30,6 +28,8 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  getDocs,
+  arrayUnion,
 } from "firebase/firestore";
 
 import { db } from "../services/firebase";
@@ -66,21 +66,35 @@ const [replyTo, setReplyTo] =
   const flatListRef = useRef();
 
   useEffect(() => {
-    const q = query(
-      collection(
-        db,
-        "trips",
-        tripId,
-        "chats"
-      ),
-      orderBy(
-        "createdAt",
-        "asc"
-      )
-    );
+  if (messages.length > 0) {
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({
+        animated: true,
+      });
+    }, 150);
+  }
+}, [messages]);
 
-    const unsubscribe =
-      onSnapshot(q, (snapshot) => {
+useEffect(() => {
+
+  const q = query(
+    collection(
+      db,
+      "trips",
+      tripId,
+      "chats"
+    ),
+    orderBy(
+      "createdAt",
+      "asc"
+    )
+  );
+
+  const unsubscribe =
+    onSnapshot(
+      q,
+      (snapshot) => {
+
         const data =
           snapshot.docs.map(
             (doc) => ({
@@ -90,18 +104,64 @@ const [replyTo, setReplyTo] =
           );
 
         setMessages(data);
+      }
+    );
 
-        setTimeout(() => {
-          flatListRef.current?.scrollToEnd(
-            {
-              animated: true,
-            }
-          );
-        }, 100);
-      });
+  return unsubscribe;
 
-    return unsubscribe;
-  }, []);
+}, []);
+
+useEffect(() => {
+
+  const markSeen =
+    async () => {
+
+      const snapshot =
+        await getDocs(
+          collection(
+            db,
+            "trips",
+            tripId,
+            "chats"
+          )
+        );
+
+      snapshot.forEach(
+        async (msg) => {
+
+          const data =
+            msg.data();
+
+          if (
+            !data.seenBy?.includes(
+              user.uid
+            )
+          ) {
+
+            await updateDoc(
+              msg.ref,
+              {
+                seenBy:
+                  arrayUnion(
+                    user.uid
+                  ),
+              }
+            );
+
+          }
+
+        }
+      );
+
+    };
+
+  if (
+    messages.length > 0
+  ) {
+    markSeen();
+  }
+
+}, [messages]);
 
   const sendMessage =
     async () => {
@@ -112,59 +172,53 @@ const [replyTo, setReplyTo] =
       }
 
       await addDoc(
-        collection(
-          db,
-          "trips",
-          tripId,
-          "chats"
-        ),
-        {
+  collection(
+    db,
+    "trips",
+    tripId,
+    "chats"
+  ),
+  {
 
-text:message,
+    text: message,
 
-senderId:user.uid,
+    senderId:
+      user.uid,
 
-senderName:
-user.displayName ||
-"User",
+    senderName:
+      user.displayName ||
+      "User",
 
-createdAt:
-serverTimestamp(),
+    createdAt:
+      serverTimestamp(),
 
-deleted:false,
+    deleted: false,
 
-replyTo:
+    seenBy: [
+      user.uid
+    ],
 
-replyTo
+    replyTo:
+      replyTo
+        ? {
+            text:
+              replyTo.text,
+            senderName:
+              replyTo.senderName,
+          }
+        : null,
 
-?
-
-{
-
-text:
-replyTo.text,
-
-senderName:
-replyTo.senderName,
-
-}
-
-:
-
-null,
-
-}
-
-      );
-
-      setMessage("");
-      setReplyTo(
-null
+  }
 );
-      
-    };
 
-    const unsendMessage = async (id) => {
+setMessage("");
+setReplyTo(null);
+
+};
+ 
+const unsendMessage =
+async (id) => {
+
   await updateDoc(
     doc(
       db,
@@ -178,6 +232,7 @@ null
       text: "",
     }
   );
+
 };
 
   const renderItem = ({ item }) => {
@@ -294,7 +349,7 @@ marginBottom:5,
 
 ↩ Replying to
 {" "}
-{replyTo?.senderName}
+{item.replyTo?.senderName}
 
 </Text>
 
@@ -342,29 +397,61 @@ mine
                 : "This message was unsent"
               : item.text}
           </Text>
+<View
+style={{
+flexDirection:"row",
+alignItems:"center",
+justifyContent:"flex-end",
+marginTop:5,
+}}
+>
 
-          <Text
-            style={[
-              styles.time,
-              mine
-                ? styles.myTime
-                : styles.otherTime,
-            ]}
-          >
-            {item.createdAt
-              ? item.createdAt
-                  .toDate()
-                  .toLocaleTimeString(
-                    [],
-                    {
-                      hour:
-                        "2-digit",
-                      minute:
-                        "2-digit",
-                    }
-                  )
-              : ""}
-          </Text>
+<Text
+style={[
+styles.time,
+mine
+? styles.myTime
+: styles.otherTime,
+]}
+>
+{item.createdAt
+? item.createdAt
+.toDate()
+.toLocaleTimeString(
+[],
+{
+hour:"2-digit",
+minute:"2-digit",
+}
+)
+: ""}
+</Text>
+
+{
+mine && (
+
+<Ionicons
+name={
+item.seenBy?.length > 1
+? "checkmark-done"
+: "checkmark"
+}
+size={14}
+color={
+item.seenBy?.length > 1
+? "#4FC3F7"
+: "#DDD"
+}
+style={{
+marginLeft:4,
+}}
+/>
+
+)
+
+}
+
+</View>
         </View>
       </TouchableOpacity>
     </View>
@@ -439,11 +526,7 @@ mine
     paddingBottom: 20,
   }}
 
-  onContentSizeChange={() =>
-    flatListRef.current?.scrollToEnd({
-      animated: true,
-    })
-  }
+
 />
 
 {
