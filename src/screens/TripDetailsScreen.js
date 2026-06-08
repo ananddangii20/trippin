@@ -157,10 +157,14 @@ return ( <SafeAreaView style={styles.container}>
     {/* Hero Image */}
 
     <ImageBackground
-      source={image}
-      style={styles.heroImage}
-      imageStyle={styles.heroImageRadius}
-    >
+  source={
+    image
+      ? { uri: image }
+      : require("../../assets/images/trip1.png")
+  }
+  style={styles.heroImage}
+  imageStyle={styles.heroImageRadius}
+>
       <View style={styles.avatarContainer}>
         <Image
           source={require("../../assets/images/user1.png")}
@@ -332,7 +336,12 @@ user?.uid === creatorId && (
       <TouchableOpacity
   style={styles.actionItem}
   onPress={() =>
-    navigation.navigate("Photos")
+  navigation.navigate(
+  "Photos",
+  {
+    tripId,
+  }
+)
   }
 >
   <Ionicons
@@ -341,7 +350,7 @@ user?.uid === creatorId && (
     color="#7C4DFF"
   />
   <Text style={styles.actionText}>
-    Photos
+    Media
   </Text>
 </TouchableOpacity>
     </View>

@@ -35,18 +35,21 @@ export default StyleSheet.create({
     marginTop: 3,
     textAlign: "center",
   },
+heroImage: {
+  height: 230,
+  marginHorizontal: 20,
+  marginTop: 15,
+  justifyContent: "flex-end",
 
-  heroImage: {
-    height: 230,
-    marginHorizontal: 20,
-    marginTop: 15,
-    justifyContent: "flex-end",
-    overflow: "hidden",
-  },
+  borderRadius: 20,
+  overflow: "hidden",
+},
 
-  heroImageRadius: {
-    borderRadius: 20,
-  },
+heroImageRadius: {
+  width: "100%",
+  height: "100%",
+  borderRadius: 20,
+},
 
   avatarContainer: {
     flexDirection: "row",

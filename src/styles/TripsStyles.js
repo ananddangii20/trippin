@@ -44,16 +44,18 @@ export default StyleSheet.create({
     marginBottom: 15,
   },
 
-  card: {
-    height: 190,
-    marginHorizontal: 20,
-    marginBottom: 18,
-    justifyContent: "flex-end",
-  },
+card: {
+  height: 190,
+  marginHorizontal: 20,
+  marginBottom: 18,
+  justifyContent: "flex-end",
+  borderRadius: 20,
+  overflow: "hidden",
+},
 
-  cardImage: {
-    borderRadius: 20,
-  },
+cardImage: {
+  borderRadius: 20,
+},
 
   overlay: {
     backgroundColor: "rgba(0,0,0,0.25)",

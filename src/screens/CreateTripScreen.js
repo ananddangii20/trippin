@@ -8,6 +8,7 @@ import {
   Alert,
   StyleSheet,
   Image,
+  ScrollView,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,6 +24,10 @@ import {
 
 import { auth, db } from "../services/firebase";
 
+import * as ImagePicker from "expo-image-picker";
+
+
+
 export default function CreateTripScreen({
   navigation,
 }) {
@@ -30,6 +35,9 @@ export default function CreateTripScreen({
     useState("");
   const [budget, setBudget] =
     useState("");
+
+    const [image, setImage] =
+  useState(null);
 
   const [startDate, setStartDate] =
     useState(new Date());
@@ -43,20 +51,20 @@ export default function CreateTripScreen({
   const [selecting, setSelecting] =
     useState("start");
 
-  const formatDate = (date) => {
-    const day = String(
-      date.getDate()
-    ).padStart(2, "0");
+ const formatDate = (date) => {
+  const day = String(
+    date.getDate()
+  ).padStart(2, "0");
 
-    const month = String(
-      date.getMonth() + 1
-    ).padStart(2, "0");
+  const month = String(
+    date.getMonth() + 1
+  ).padStart(2, "0");
 
-    const year =
-      date.getFullYear();
+  const year =
+    date.getFullYear();
 
-    return `${day}/${month}/${year}`;
-  };
+  return `${day}/${month}/${year}`;
+};
 
   const getStatus = () => {
     const today = new Date();
@@ -73,6 +81,62 @@ export default function CreateTripScreen({
     }
 
     return "Expired";
+  };
+
+  const pickImage = async () => {
+  const permission =
+    await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+  if (!permission.granted) {
+    Alert.alert(
+      "Permission Required",
+      "Please allow gallery access."
+    );
+    return;
+  }
+
+const result =
+  await ImagePicker.launchImageLibraryAsync({
+    allowsEditing: true,
+    aspect: [16, 9],
+    quality: 0.6,
+  });
+
+
+  if (!result.canceled) {
+    setImage(result.assets[0].uri);
+  }
+};
+
+const uploadImageToCloudinary =
+  async () => {
+    if (!image) return null;
+
+    const formData = new FormData();
+
+    formData.append("file", {
+      uri: image,
+      type: "image/jpeg",
+      name: "trip.jpg",
+    });
+
+    formData.append(
+      "upload_preset",
+      "trip_planner"
+    );
+
+    const response = await fetch(
+      "https://api.cloudinary.com/v1_1/dbyrgfhu9/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data =
+      await response.json();
+
+    return data.secure_url;
   };
 
   const createTrip = async () => {
@@ -95,12 +159,16 @@ export default function CreateTripScreen({
       return;
     }
 
-    try {
-     await addDoc(
+  try {
+  const imageUrl =
+    await uploadImageToCloudinary();
+
+  await addDoc(
   collection(db, "trips"),
   {
     title: destination,
     destination,
+    coverImage: imageUrl,
     budget: Number(budget),
     collected: 0,
     progress: 0,
@@ -149,29 +217,36 @@ export default function CreateTripScreen({
           .split("T")[0];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <TouchableOpacity
-        style={styles.backBtn}
-        onPress={() =>
-          navigation.navigate("Trips")
-        }
-      >
-        <Ionicons
-          name="chevron-back"
-          size={24}
-          color="#7C4DFF"
-        />
-      </TouchableOpacity>
+  <SafeAreaView style={styles.container}>
+  <TouchableOpacity
+    style={styles.backBtn}
+    onPress={() =>
+      navigation.navigate("Trips")
+    }
+  >
+    <Ionicons
+      name="chevron-back"
+      size={24}
+      color="#7C4DFF"
+    />
+  </TouchableOpacity>
 
-      <View style={styles.logoContainer}>
-        <Image
-          source={require("../../assets/images/logo.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+  <View style={styles.logoContainer}>
+    <Image
+      source={require("../../assets/images/logo.png")}
+      style={styles.logo}
+      resizeMode="contain"
+    />
+  </View>
 
-      <View style={styles.card}>
+  <ScrollView
+    showsVerticalScrollIndicator={false}
+    contentContainerStyle={{
+      paddingBottom: 40,
+    }}
+  >
+    <View style={styles.card}>
+
         <Text style={styles.heading}>
           Create New Trip
         </Text>
@@ -228,6 +303,35 @@ export default function CreateTripScreen({
         />
 
         <TouchableOpacity
+  style={styles.uploadButton}
+  onPress={pickImage}
+>
+  <Text style={styles.uploadText}>
+    {image
+  ? "📷 Change Selected Image"
+  : "📷 Upload Cover Image"}
+  </Text>
+</TouchableOpacity>
+
+{image && (
+  <>
+    <Image
+      source={{ uri: image }}
+      style={styles.previewImage}
+    />
+
+    <TouchableOpacity
+      style={styles.removeImageButton}
+      onPress={() => setImage(null)}
+    >
+      <Text style={styles.removeImageText}>
+        Remove Image
+      </Text>
+    </TouchableOpacity>
+  </>
+)}
+
+        <TouchableOpacity
           style={styles.button}
           onPress={createTrip}
         >
@@ -238,6 +342,8 @@ export default function CreateTripScreen({
           </Text>
         </TouchableOpacity>
       </View>
+        </ScrollView>
+
 
       <Modal
         isVisible={calendarVisible}
@@ -290,6 +396,7 @@ export default function CreateTripScreen({
           />
         </View>
       </Modal>
+      
     </SafeAreaView>
   );
 }
@@ -394,4 +501,41 @@ backBtn: {
     overflow: "hidden",
     padding: 10,
   },
+
+  uploadButton: {
+  height: 56,
+  borderRadius: 14,
+  borderWidth: 1,
+  borderStyle: "dashed",
+  borderColor: "#7C4DFF",
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 15,
+},
+
+uploadText: {
+  color: "#7C4DFF",
+  fontWeight: "600",
+  fontSize: 15,
+},
+
+previewImage: {
+  width: "100%",
+  height: 180,
+  borderRadius: 14,
+  marginBottom: 15,
+},
+
+removeImageButton: {
+  backgroundColor: "#FFE5E5",
+  borderRadius: 12,
+  paddingVertical: 12,
+  alignItems: "center",
+  marginBottom: 15,
+},
+
+removeImageText: {
+  color: "#E53935",
+  fontWeight: "600",
+},
 });

@@ -118,11 +118,15 @@ export default function TripCard({
 )
       }
     >
-      <ImageBackground
-        source={image}
-        style={styles.card}
-        imageStyle={styles.cardImage}
-      >
+     <ImageBackground
+  source={
+    image
+      ? { uri: image }
+      : require("../../assets/images/trip1.png")
+  }
+  style={styles.card}
+  imageStyle={styles.cardImage}
+>
         <View style={styles.overlay}>
           <Text
             style={styles.cardTitle}

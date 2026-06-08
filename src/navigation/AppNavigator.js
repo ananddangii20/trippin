@@ -9,6 +9,8 @@ import SignupScreen from "../screens/SignupScreen";
 import TripsScreen from "../screens/TripsScreen";
 import TripDetailsScreen from "../screens/TripDetailsScreen";
 import PhotosScreen from "../screens/PhotosScreen";
+import GalleryScreen from "../screens/GalleryScreen";
+import VideoGalleryScreen from "../screens/VideoGalleryScreen";
 import CreateTripScreen from "../screens/CreateTripScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import ChatScreen from "../screens/ChatScreen";
@@ -61,6 +63,20 @@ export default function AppNavigator() {
             name="Photos"
             component={PhotosScreen}
           />
+
+          <Stack.Screen
+  name="Gallery"
+  component={
+    GalleryScreen
+  }
+/>
+
+<Stack.Screen
+  name="VideoGallery"
+  component={
+    VideoGalleryScreen
+  }
+/>
 
          <Stack.Screen
   name="CreateTrip"

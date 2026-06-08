@@ -124,7 +124,7 @@ export default function TripsScreen() {
     trip.startDate,
     trip.endDate
   )}
-  image={require("../../assets/images/trip1.png")}
+ image={trip.coverImage}
 />
         ))}
       </ScrollView>
