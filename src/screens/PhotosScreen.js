@@ -509,7 +509,7 @@ setTimeout(() => {
           : "checkmark-circle-outline"
       }
       size={28}
-      color="#6A40F4"
+      color="#2563EB"
     />
   </TouchableOpacity>
 </View>
@@ -803,7 +803,7 @@ selectedImages.length >
       <Ionicons
         name="download"
         size={32}
-        color="#6A40F4"
+        color="#2563EB"
       />
       <Text>
         Download

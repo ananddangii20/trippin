@@ -1,121 +1,158 @@
+import { StyleSheet, Dimensions } from "react-native";
 
-import { StyleSheet } from "react-native";
+const { width, height } = Dimensions.get("window");
 
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FC",
+    backgroundColor: "transparent",
+  },
+
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+
+  overlayScreen: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.78)",
   },
 
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 15,
-    paddingBottom: 15,
-    backgroundColor: "#fff",
-  },
+  flexDirection: "row",
+  alignItems: "center",
 
-  headerCenter: {
-    flex: 1,
-    marginLeft: 15,
-  },
+  paddingHorizontal: 20,
+  paddingTop: 15,
+  paddingBottom: 15,
 
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#222",
-    textAlign: "center",
-  },
-
-  date: {
-    fontSize: 13,
-    color: "#777",
-    marginTop: 3,
-    textAlign: "center",
-  },
-heroImage: {
-  height: 230,
-  marginHorizontal: 20,
-  marginTop: 15,
-  justifyContent: "flex-end",
-
-  borderRadius: 20,
-  overflow: "hidden",
+  backgroundColor: "rgba(255,255,255,0.85)",
 },
 
-heroImageRadius: {
-  width: "100%",
-  height: "100%",
-  borderRadius: 20,
+headerSide: {
+  width: 40,
+  alignItems: "center",
+  justifyContent: "center",
 },
+
+headerCenter: {
+  flex: 1,
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+title: {
+  fontSize: 20,
+  fontWeight: "700",
+  color: "#1E293B",
+  textAlign: "center",
+},
+
+date: {
+  fontSize: 13,
+  color: "#64748B",
+  marginTop: 3,
+  textAlign: "center",
+},
+
+  heroImage: {
+    height: height * 0.28,
+
+    marginHorizontal: width * 0.05,
+    marginTop: height * 0.02,
+
+    justifyContent: "flex-end",
+
+    borderRadius: width * 0.05,
+    overflow: "hidden",
+  },
+
+  heroImageRadius: {
+    width: "100%",
+    height: "100%",
+    borderRadius: width * 0.05,
+  },
 
   avatarContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 15,
+    padding: width * 0.04,
   },
 
   avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: width * 0.11,
+    height: width * 0.11,
+    borderRadius: width * 0.055,
+
     borderWidth: 2,
-    borderColor: "#fff",
+    borderColor: "#FFFFFF",
   },
 
   moreAvatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "#fff",
+    width: width * 0.11,
+    height: width * 0.11,
+    borderRadius: width * 0.055,
+
+    backgroundColor: "#FFFFFF",
+
     justifyContent: "center",
     alignItems: "center",
+
     marginLeft: -12,
   },
 
   moreText: {
     fontWeight: "700",
-    color: "#222",
-    fontSize: 13,
+    color: "#1E293B",
+    fontSize: width * 0.032,
   },
 
   budgetCard: {
-    marginHorizontal: 20,
-    marginTop: 15,
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 20,
+    marginHorizontal: width * 0.05,
+    marginTop: height * 0.02,
+
+    backgroundColor: "rgba(255,255,255,0.88)",
+
+    borderRadius: width * 0.05,
+
+    padding: width * 0.05,
+
     flexDirection: "row",
     justifyContent: "space-between",
+
     elevation: 4,
   },
 
   cardLabel: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: width * 0.032,
+    color: "#64748B",
     marginBottom: 8,
   },
 
   bigText: {
-    fontSize: 28,
+    fontSize: width * 0.07,
     fontWeight: "700",
-    color: "#222",
+    color: "#1E293B",
   },
 
   greenText: {
-    fontSize: 28,
+    fontSize: width * 0.07,
     fontWeight: "700",
     color: "#22C55E",
   },
 
   progressCard: {
-    backgroundColor: "#fff",
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 20,
-    marginTop: 15,
+    backgroundColor: "rgba(255,255,255,0.88)",
+
+    marginHorizontal: width * 0.05,
+
+    borderRadius: width * 0.05,
+
+    padding: width * 0.05,
+
+    marginTop: height * 0.02,
+
     elevation: 4,
   },
 
@@ -126,15 +163,15 @@ heroImageRadius: {
   },
 
   progressTitle: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: "600",
-    color: "#222",
+    color: "#1E293B",
   },
 
   progressPercent: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: "700",
-    color: "#6A40F4",
+    color: "#2563EB",
   },
 
   progressTrack: {
@@ -146,20 +183,25 @@ heroImageRadius: {
 
   progressFill: {
     height: "100%",
-    backgroundColor: "#3AE374",
+    backgroundColor: "#22C55E",
     borderRadius: 20,
   },
 
   actionContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 15,
-    backgroundColor: "#fff",
+
+    marginHorizontal: width * 0.05,
+    marginTop: height * 0.025,
+    marginBottom: height * 0.02,
+
+    backgroundColor: "rgba(255,255,255,0.88)",
+
     paddingVertical: 18,
     paddingHorizontal: 10,
-    borderRadius: 20,
+
+    borderRadius: width * 0.05,
+
     elevation: 3,
   },
 
@@ -170,17 +212,22 @@ heroImageRadius: {
 
   actionText: {
     marginTop: 8,
-    fontSize: 12,
-    color: "#444",
+    fontSize: width * 0.03,
+    color: "#1E293B",
     fontWeight: "500",
   },
 
   timelineContainer: {
-    backgroundColor: "#fff",
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
+    backgroundColor: "rgba(255,255,255,0.88)",
+
+    marginHorizontal: width * 0.05,
+
+    borderRadius: width * 0.05,
+
+    padding: width * 0.05,
+
+    marginBottom: height * 0.03,
+
     elevation: 4,
   },
 
@@ -188,18 +235,19 @@ heroImageRadius: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+
     marginBottom: 20,
   },
 
   sectionTitle: {
-    fontSize: 18,
+    fontSize: width * 0.045,
     fontWeight: "700",
-    color: "#222",
+    color: "#1E293B",
   },
 
   viewAll: {
-    color: "#6A40F4",
-    fontWeight: "600",
+    color: "#2563EB",
+    fontWeight: "700",
   },
 
   timelineItem: {
@@ -211,7 +259,9 @@ heroImageRadius: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "#6A40F4",
+
+    backgroundColor: "#F4C16D",
+
     marginTop: 5,
   },
 
@@ -221,22 +271,25 @@ heroImageRadius: {
   },
 
   timelineTime: {
-    fontSize: 12,
-    color: "#777",
+    fontSize: width * 0.03,
+    color: "#64748B",
     marginBottom: 3,
   },
 
   timelineTitle: {
-    fontSize: 15,
-    color: "#222",
+    fontSize: width * 0.038,
+    color: "#1E293B",
     fontWeight: "500",
   },
 
   navbar: {
-    height: 75,
-    backgroundColor: "#fff",
+    height: 80,
+
+    backgroundColor: "rgba(255,255,255,0.95)",
+
     borderTopWidth: 1,
-    borderTopColor: "#eee",
+    borderTopColor: "#DCEBFF",
+
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
@@ -247,16 +300,15 @@ heroImageRadius: {
   },
 
   navText: {
-    fontSize: 12,
-    color: "#999",
+    fontSize: width * 0.03,
+    color: "#94A3B8",
     marginTop: 3,
   },
 
   activeNav: {
-    fontSize: 12,
-    color: "#6A40F4",
+    fontSize: width * 0.03,
+    color: "#2563EB",
     fontWeight: "700",
     marginTop: 3,
   },
 });
-

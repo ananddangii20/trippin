@@ -1,83 +1,112 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
+
+const { width, height } = Dimensions.get("window");
 
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    backgroundColor: "transparent",
+    paddingHorizontal: width * 0.05,
+    paddingTop: height * 0.02,
+  },
+
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+
+  overlayScreen: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.78)",
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
-    marginBottom: 30,
+
+    marginTop: height * 0.01,
+    marginBottom: height * 0.035,
   },
 
   backButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "#F4F0FF",
+    width: width * 0.11,
+    height: width * 0.11,
+
+    borderRadius: width * 0.055,
+
+    backgroundColor: "#F8FBFF",
+
     justifyContent: "center",
     alignItems: "center",
+
     marginRight: 12,
+
     borderWidth: 1,
-    borderColor: "#E7DEFF",
+    borderColor: "#DCEBFF",
   },
 
   headerTitle: {
-    fontSize: 28,
+    fontSize: width * 0.07,
     fontWeight: "700",
-    color: "#111",
+    color: "#1E293B",
   },
 
   profileCard: {
-  backgroundColor: "#F4F0FF",
-  borderRadius: 24,
-  padding: 20,
-  marginBottom: 25,
+    backgroundColor: "rgba(255,255,255,0.88)",
 
-  borderWidth: 1,
-  borderColor: "#E7DEFF",
-},
+    borderRadius: 24,
+    padding: 20,
 
-profileTop: {
-  flexDirection: "row",
-  alignItems: "center",
-},
+    marginBottom: 25,
 
-divider: {
-  height: 1,
-  backgroundColor: "#DDD4FF",
-  marginVertical: 18,
-},
+    borderWidth: 1,
+    borderColor: "#DCEBFF",
 
-statsContainer: {
-  flexDirection: "row",
-},
+    shadowColor: "#2563EB",
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
 
-statBox: {
-  flex: 1,
-  alignItems: "center",
-},
+    elevation: 4,
+  },
 
-statNumber: {
-  fontSize: 20,
-  fontWeight: "700",
-  color: "#6A40F4",
-},
+  profileTop: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-statLabel: {
-  fontSize: 12,
-  color: "#666",
-  marginTop: 5,
-},
+  divider: {
+    height: 1,
+    backgroundColor: "#DCEBFF",
+    marginVertical: 18,
+  },
+
+  statsContainer: {
+    flexDirection: "row",
+  },
+
+  statBox: {
+    flex: 1,
+    alignItems: "center",
+  },
+
+  statNumber: {
+    fontSize: width * 0.05,
+    fontWeight: "700",
+    color: "#2563EB",
+  },
+
+  statLabel: {
+    fontSize: 12,
+    color: "#64748B",
+    marginTop: 5,
+  },
 
   menuItem: {
-    backgroundColor: "#F4F0FF",
+    backgroundColor: "rgba(255,255,255,0.88)",
+
     borderRadius: 20,
+
     paddingHorizontal: 18,
     paddingVertical: 18,
 
@@ -88,7 +117,13 @@ statLabel: {
     marginBottom: 14,
 
     borderWidth: 1,
-    borderColor: "#E7DEFF",
+    borderColor: "#DCEBFF",
+
+    shadowColor: "#2563EB",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+
+    elevation: 2,
   },
 
   menuLeft: {
@@ -98,13 +133,15 @@ statLabel: {
 
   menuText: {
     marginLeft: 15,
+
     fontSize: 16,
     fontWeight: "500",
-    color: "#111",
+
+    color: "#1E293B",
   },
 
   icon: {
-    color: "#6A40F4",
+    color: "#2563EB",
   },
 
   scrollContent: {

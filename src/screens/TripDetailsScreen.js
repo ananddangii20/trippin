@@ -86,20 +86,23 @@ return ( <SafeAreaView style={styles.container}>
 {/* Header */}
 
 
-  <View style={styles.header}>
-
+ <View style={styles.header}>
   <TouchableOpacity
+    style={styles.headerSide}
     onPress={() => navigation.goBack()}
   >
     <Ionicons
       name="chevron-back"
       size={28}
-      color="#222"
+      color="#2563EB"
     />
   </TouchableOpacity>
 
   <View style={styles.headerCenter}>
-    <Text style={styles.title}>
+    <Text
+      numberOfLines={1}
+      style={styles.title}
+    >
       {title}
     </Text>
 
@@ -108,52 +111,15 @@ return ( <SafeAreaView style={styles.container}>
     </Text>
   </View>
 
-  <View
-    style={{
-      flexDirection: "row",
-      alignItems: "center",
-    }}
-  >
-
-   <TouchableOpacity
-  onPress={() =>
-    navigation.navigate(
-      "ViewMembers",
-      {
-        tripId,
-      }
-    )
-  }
->
-  <Ionicons
-    name="people"
-    size={24}
-    color="#222"
-  />
-</TouchableOpacity>
-    {
-      user?.uid === creatorId && (
-
-      <TouchableOpacity
-        onPress={deleteTrip}
-      >
-        <Ionicons
-          name="trash"
-          size={24}
-          color="red"
-        />
-      </TouchableOpacity>
-
-      )
-    }
-
-  </View>
-
+  <View style={styles.headerSide} />
 </View>
 
-  <ScrollView
-    showsVerticalScrollIndicator={false}
-  >
+<ScrollView
+  showsVerticalScrollIndicator={false}
+  contentContainerStyle={{
+    paddingBottom: 40,
+  }}
+>
     {/* Hero Image */}
 
     <ImageBackground
@@ -194,6 +160,50 @@ return ( <SafeAreaView style={styles.container}>
         </View>
       </View>
     </ImageBackground>
+<TouchableOpacity
+  style={{
+    marginHorizontal: 20,
+    marginTop: 15,
+    backgroundColor: "#2563EB",
+    paddingVertical: 16,
+    borderRadius: 18,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+
+    shadowColor: "#2563EB",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+
+    elevation: 5,
+  }}
+  onPress={() =>
+    navigation.navigate("ViewMembers", {
+      tripId,
+    })
+  }
+>
+  <Ionicons
+    name="people"
+    size={20}
+    color="#fff"
+  />
+
+  <Text
+    style={{
+      color: "#fff",
+      fontWeight: "700",
+      marginLeft: 8,
+      fontSize: 15,
+    }}
+  >
+    View All Members
+  </Text>
+</TouchableOpacity>
 
     {/* Budget Card */}
 
@@ -247,34 +257,7 @@ return ( <SafeAreaView style={styles.container}>
     {/* Quick Actions */}
 
     <View style={styles.actionContainer}>
-     {
-user?.uid === creatorId && (
-
-<TouchableOpacity
-  style={styles.actionItem}
-  onPress={() =>
-    navigation.navigate(
-      "AddMembers",
-      {
-        tripId,
-      }
-    )
-  }
->
-  <Ionicons
-    name="person-add"
-    size={26}
-    color="#ff2b2b"
-  />
-
-  <Text style={styles.actionText}>
-    Members
-  </Text>
-
-</TouchableOpacity>
-
-)
-}
+     
 <TouchableOpacity
   style={styles.actionItem}
   onPress={() =>
@@ -287,7 +270,7 @@ user?.uid === creatorId && (
         <Ionicons
           name="chatbubble"
           size={26}
-          color="#7C4DFF"
+          color="#2563EB"
         />
         <Text style={styles.actionText}>
           Chat
@@ -300,7 +283,7 @@ user?.uid === creatorId && (
         <Ionicons
           name="wallet"
           size={26}
-          color="#7C4DFF"
+          color="#2563EB"
         />
         <Text style={styles.actionText}>
           Expenses
@@ -313,7 +296,7 @@ user?.uid === creatorId && (
         <Ionicons
           name="bed"
           size={26}
-          color="#7C4DFF"
+         color="#2563EB"
         />
         <Text style={styles.actionText}>
           Stay
@@ -326,7 +309,7 @@ user?.uid === creatorId && (
         <Ionicons
           name="map"
           size={26}
-          color="#F59E0B"
+          color="#2563EB"
         />
         <Text style={styles.actionText}>
           Plan
@@ -347,7 +330,7 @@ user?.uid === creatorId && (
   <Ionicons
     name="camera"
     size={26}
-    color="#7C4DFF"
+    color="#2563EB"
   />
   <Text style={styles.actionText}>
     Media
@@ -357,6 +340,7 @@ user?.uid === creatorId && (
 
     {/* Upcoming */}
 
+    
     <View style={styles.timelineContainer}>
       <View style={styles.timelineHeader}>
         <Text style={styles.sectionTitle}>
@@ -409,12 +393,55 @@ user?.uid === creatorId && (
           <Text style={styles.timelineTitle}>
             Dinner at Britto's
           </Text>
+          
         </View>
+        
       </View>
+      
     </View>
+    
+    {
+  user?.uid === creatorId && (
+    <TouchableOpacity
+      onPress={deleteTrip}
+      style={{
+        marginHorizontal: 20,
+        marginTop: 10,
+        marginBottom: 30,
+        backgroundColor: "#DC2626",
+        paddingVertical: 15,
+        borderRadius: 14,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Ionicons
+        name="trash"
+        size={20}
+        color="#fff"
+      />
+
+      <Text
+        style={{
+          color: "#fff",
+          fontWeight: "700",
+          marginLeft: 8,
+          fontSize: 15,
+        }}
+      >
+        Delete Group
+      </Text>
+    </TouchableOpacity>
+  )
+}
+    
   </ScrollView>
 
+
   <BottomNavbar activeTab="Trips" />
+
+  
 </SafeAreaView>
 
 

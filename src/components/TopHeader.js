@@ -39,7 +39,7 @@ export default function TopHeader() {
           <Ionicons
             name="add-circle"
             size={30}
-            color="#7C4DFF"
+            color="#2563EB"
           />
         </TouchableOpacity>
 
@@ -47,7 +47,7 @@ export default function TopHeader() {
           <Ionicons
             name="log-out-outline"
             size={28}
-            color="#222"
+            color="#1E293B"
           />
         </TouchableOpacity>
       </View>

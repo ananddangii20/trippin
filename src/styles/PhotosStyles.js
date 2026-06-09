@@ -35,7 +35,7 @@ export default StyleSheet.create({
   },
 
   activeFilter: {
-    backgroundColor: "#6A40F4",
+    backgroundColor: "#2563EB",
   },
 
   filterText: {
@@ -133,7 +133,7 @@ export default StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: "#6A40F4",
+    backgroundColor: "#2563EB",
     justifyContent: "center",
     alignItems: "center",
     elevation: 8,

@@ -58,41 +58,70 @@ export default function BottomNavbar({
   };
 
   return (
-    <View style={styles.navbar}>
-      {tabs.map((tab) => (
-        <TouchableOpacity
-          key={tab.name}
-          style={styles.navItem}
-          onPress={() => handleNavigation(tab)}
-        >
-          <Ionicons
-            name={tab.icon}
-            size={24}
-            color={
-              activeTab === tab.name
-                ? "#6A40F4"
-                : "#888"
-            }
-          />
+    <View
+      style={[
+        styles.navbar,
+        {
+          backgroundColor:
+            "rgba(255,255,255,0.95)",
+          borderTopColor: "#DCEBFF",
+        },
+      ]}
+    >
+      {tabs.map((tab) => {
+        const isActive =
+          activeTab === tab.name;
 
-          <Text
-            style={{
-              color:
-                activeTab === tab.name
-                  ? "#6A40F4"
-                  : "#888",
-              fontSize: 12,
-              marginTop: 4,
-              fontWeight:
-                activeTab === tab.name
-                  ? "600"
-                  : "400",
-            }}
+        return (
+          <TouchableOpacity
+            key={tab.name}
+            style={styles.navItem}
+            onPress={() =>
+              handleNavigation(tab)
+            }
           >
-            {tab.name}
-          </Text>
-        </TouchableOpacity>
-      ))}
+            <Ionicons
+              name={tab.icon}
+              size={24}
+              color={
+                isActive
+                  ? "#2563EB"
+                  : "#94A3B8"
+              }
+            />
+
+            <Text
+              style={{
+                color: isActive
+                  ? "#2563EB"
+                  : "#94A3B8",
+
+                fontSize: 12,
+                marginTop: 4,
+
+                fontWeight: isActive
+                  ? "700"
+                  : "500",
+              }}
+            >
+              {tab.name}
+            </Text>
+
+            {isActive && (
+              <View
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor:
+                    "#F4C16D",
+                  marginTop: 4,
+                }}
+              />
+            )}
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }

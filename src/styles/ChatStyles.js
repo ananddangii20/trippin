@@ -1,47 +1,74 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
+
+const { width, height } = Dimensions.get("window");
 
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F7F8FC",
+    backgroundColor: "transparent",
+  },
+
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+
+  overlayScreen: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.72)",
   },
 
   header: {
-    height: 75,
-    backgroundColor: "#FFFFFF",
+    height: height * 0.09,
+
+    backgroundColor: "rgba(255,255,255,0.85)",
 
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
 
-    paddingHorizontal: 20,
+    paddingHorizontal: width * 0.05,
 
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F1F1",
+    borderBottomColor: "#DCEBFF",
 
     elevation: 2,
   },
 
+  headerSide: {
+    width: width * 0.1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  headerCenter: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   title: {
-    fontSize: 22,
+    fontSize: width * 0.05,
     fontWeight: "700",
-    color: "#111827",
+    color: "#1E293B",
+    textAlign: "center",
   },
 
   subtitle: {
-    fontSize: 13,
-    color: "#7B7B7B",
+    fontSize: width * 0.032,
+    color: "#64748B",
     marginTop: 2,
+    textAlign: "center",
   },
 
   chatContainer: {
-    paddingHorizontal: 15,
-    paddingTop: 20,
-    paddingBottom: 10,
+    paddingHorizontal: width * 0.04,
+    paddingTop: height * 0.02,
+    paddingBottom: height * 0.02,
   },
 
   messageContainer: {
-    marginBottom: 18,
+    marginBottom: height * 0.02,
   },
 
   left: {
@@ -53,77 +80,80 @@ export default StyleSheet.create({
   },
 
   username: {
-    fontSize: 12,
-    color: "#888",
+    fontSize: width * 0.03,
+    color: "#64748B",
     marginBottom: 5,
     marginHorizontal: 10,
     fontWeight: "600",
   },
 
   bubble: {
-    maxWidth: "78%",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 22,
+    maxWidth: "82%",
+    paddingHorizontal: width * 0.04,
+    paddingVertical: height * 0.015,
+    borderRadius: width * 0.06,
   },
 
   myBubble: {
-    backgroundColor: "#7C4DFF",
+    backgroundColor: "#2563EB",
 
-    borderBottomRightRadius: 6,
+    borderBottomRightRadius: 8,
 
-    shadowColor: "#7C4DFF",
+    shadowColor: "#2563EB",
     shadowOpacity: 0.15,
     shadowRadius: 8,
+
     elevation: 3,
   },
 
   otherBubble: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255,255,255,0.92)",
 
-    borderBottomLeftRadius: 6,
+    borderBottomLeftRadius: 8,
 
     shadowColor: "#000",
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.05,
     shadowRadius: 8,
+
     elevation: 2,
   },
 
   messageText: {
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: width * 0.038,
+    lineHeight: width * 0.055,
   },
 
   myMessage: {
-    color: "#ffffff",
+    color: "#FFFFFF",
   },
 
   otherMessage: {
-    color: "#111827",
+    color: "#1E293B",
   },
 
   time: {
-    fontSize: 10,
+    fontSize: width * 0.024,
     marginTop: 5,
     alignSelf: "flex-end",
-    opacity: 0.7,
+    opacity: 0.75,
   },
 
   myTime: {
-    color: "#F3F3F3",
+    color: "#E5E7EB",
   },
 
   otherTime: {
-    color: "#666",
+    color: "#64748B",
   },
 
   inputWrapper: {
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
+    paddingHorizontal: width * 0.04,
+    paddingVertical: height * 0.015,
+
+    backgroundColor: "rgba(255,255,255,0.92)",
 
     borderTopWidth: 1,
-    borderTopColor: "#F3F3F3",
+    borderTopColor: "#DCEBFF",
   },
 
   inputRow: {
@@ -134,39 +164,42 @@ export default StyleSheet.create({
   input: {
     flex: 1,
 
-    backgroundColor: "#F5F5F7",
+    backgroundColor: "#F8FBFF",
 
-    minHeight: 52,
-    maxHeight: 120,
+    minHeight: height * 0.065,
+    maxHeight: height * 0.15,
 
-    borderRadius: 26,
+    borderRadius: width * 0.07,
 
-    paddingHorizontal: 18,
+    paddingHorizontal: width * 0.045,
 
-    fontSize: 15,
+    fontSize: width * 0.038,
 
-    color: "#111827",
+    color: "#1E293B",
+
+    borderWidth: 1,
+    borderColor: "#DCEBFF",
   },
 
   sendButton: {
-    width: 52,
-    height: 52,
+    width: width * 0.13,
+    height: width * 0.13,
 
-    borderRadius: 26,
+    borderRadius: width * 0.065,
 
-    backgroundColor: "#7C4DFF",
+    backgroundColor: "#2563EB",
 
     justifyContent: "center",
     alignItems: "center",
 
-    marginLeft: 10,
+    marginLeft: width * 0.025,
 
-    shadowColor: "#7C4DFF",
+    shadowColor: "#2563EB",
     shadowOpacity: 0.2,
     shadowRadius: 8,
+
     elevation: 4,
   },
-  
 
   emptyContainer: {
     flex: 1,
@@ -175,16 +208,17 @@ export default StyleSheet.create({
   },
 
   emptyTitle: {
-    fontSize: 22,
+    fontSize: width * 0.06,
     fontWeight: "700",
-    color: "#222",
+    color: "#1E293B",
     marginTop: 15,
   },
 
   emptySubtitle: {
     marginTop: 8,
-    color: "#888",
-    fontSize: 15,
+    color: "#64748B",
+    fontSize: width * 0.038,
     textAlign: "center",
+    paddingHorizontal: width * 0.08,
   },
 });

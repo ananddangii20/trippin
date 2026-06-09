@@ -150,46 +150,65 @@ export default function ViewMembersScreen({
     <SafeAreaView
   style={styles.container}
 >
-     <View style={styles.header}>
+    <View style={styles.header}>
 
-<TouchableOpacity
-style={styles.backButton}
-onPress={()=>
-navigation.goBack()
-}
->
+  <TouchableOpacity
+    style={styles.backButton}
+    onPress={() =>
+      navigation.goBack()
+    }
+  >
+    <Ionicons
+      name="chevron-back"
+      size={24}
+      color="#111"
+    />
+  </TouchableOpacity>
 
-<Ionicons
-name="chevron-back"
-size={24}
-color="#111"
-/>
+  <View
+    style={styles.headerText}
+  >
+    <Text
+      style={styles.title}
+    >
+      Members
+    </Text>
 
-</TouchableOpacity>
+    <Text
+      style={styles.subtitle}
+    >
+      Group participants
+    </Text>
+  </View>
 
-<View
-style={
-styles.headerText
-}
->
-
-<Text
-style={
-styles.title
-}
->
-Members
-</Text>
-
-<Text
-style={
-styles.subtitle
-}
->
-Group participants
-</Text>
-
-</View>
+  {
+    user?.uid === creatorId && (
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate(
+            "AddMembers",
+            {
+              tripId,
+            }
+          )
+        }
+        style={{
+          width: 42,
+          height: 42,
+          borderRadius: 21,
+          backgroundColor: "#2563EB",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Ionicons
+          name="person-add"
+          size={22}
+          color="#fff"
+        />
+      </TouchableOpacity>
+    )
+  }
 
 </View>
 

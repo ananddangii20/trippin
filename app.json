@@ -13,27 +13,26 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-"ios": {
-  "supportsTablet": true,
-  "infoPlist": {
-    "NSPhotoLibraryUsageDescription": "Allow Trippin to access your photos.",
-    "NSPhotoLibraryAddUsageDescription": "Allow Trippin to save photos to your gallery."
-  }
-},
-
-"android": {
-  "package": "com.ananddangi.trippin",
-  "versionCode": 1,
-  "permissions": [
-    "READ_MEDIA_IMAGES",
-    "WRITE_EXTERNAL_STORAGE"
-  ],
-  "adaptiveIcon": {
-    "foregroundImage": "./assets/adaptive-icon.png",
-    "backgroundColor": "#ffffff"
-  },
-  "edgeToEdgeEnabled": true
-},
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow Trippin to access your photos.",
+        "NSPhotoLibraryAddUsageDescription": "Allow Trippin to save photos to your gallery."
+      }
+    },
+    "android": {
+      "package": "com.ananddangi.trippin",
+      "versionCode": 1,
+      "permissions": [
+        "READ_MEDIA_IMAGES",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
     "web": {
       "favicon": "./assets/favicon.png"
     },
@@ -41,7 +40,8 @@
       "expo-video",
       "@react-native-google-signin/google-signin",
       "@react-native-community/datetimepicker",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font"
     ],
     "extra": {
       "eas": {

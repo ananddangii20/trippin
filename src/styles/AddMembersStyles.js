@@ -1,187 +1,230 @@
-import { StyleSheet } from "react-native";
+import {
+  StyleSheet,
+  Dimensions,
+} from "react-native";
+
+const { width, height } =
+  Dimensions.get("window");
 
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FD",
+    backgroundColor: "#F8FBFF",
   },
 
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+
+    paddingHorizontal: width * 0.05,
+    paddingTop: height * 0.015,
+    paddingBottom: height * 0.025,
+  },
+
+  backButton: {
+    width: width * 0.11,
+    height: width * 0.11,
+
+    borderRadius: width * 0.055,
+
+    backgroundColor: "#FFFFFF",
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    marginRight: width * 0.04,
+
+    borderWidth: 1,
+    borderColor: "#DCEBFF",
+
+    elevation: 3,
   },
 
   title: {
-    fontSize: 28,
+    fontSize: width * 0.065,
     fontWeight: "700",
-    color: "#111",
+    color: "#1E293B",
   },
 
   subtitle: {
-    color: "#777",
-    marginTop: 5,
-    fontSize: 14,
+    color: "#64748B",
+    marginTop: 4,
+    fontSize: width * 0.035,
   },
 
   searchBox: {
-    marginHorizontal: 20,
-    backgroundColor: "#fff",
-    borderRadius: 16,
+    marginHorizontal: width * 0.05,
+
+    backgroundColor:
+      "rgba(255,255,255,0.95)",
+
+    borderRadius: 18,
+
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 15,
+
+    paddingHorizontal: 16,
+
     marginBottom: 20,
 
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#DCEBFF",
+
+    elevation: 2,
   },
 
   input: {
     flex: 1,
-    height: 52,
+    height: 54,
     marginLeft: 10,
     fontSize: 15,
+    color: "#1E293B",
   },
 
   card: {
-    backgroundColor: "#fff",
-    marginHorizontal: 20,
+    backgroundColor:
+      "rgba(255,255,255,0.95)",
+
+    marginHorizontal: width * 0.05,
     marginBottom: 12,
-    borderRadius: 18,
+
+    borderRadius: 20,
 
     padding: 15,
 
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent:
+      "space-between",
+
     alignItems: "center",
 
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: "#DCEBFF",
+
     elevation: 2,
   },
 
   left: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
   },
 
   avatar: {
-    width: 55,
-    height: 55,
-    borderRadius: 27.5,
-    backgroundColor: "#E9E5FF",
+    width: width * 0.14,
+    height: width * 0.14,
+
+    borderRadius:
+      width * 0.07,
+
+    backgroundColor:
+      "#EAF2FF",
+
+    borderWidth: 2,
+    borderColor: "#DCEBFF",
   },
 
   info: {
     marginLeft: 14,
+    flex: 1,
   },
 
   username: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: "700",
-    color: "#111",
+    color: "#1E293B",
   },
 
   bio: {
-    color: "#888",
+    color: "#64748B",
     marginTop: 3,
-    fontSize: 13,
+    fontSize: width * 0.032,
   },
 
   addButton: {
-    backgroundColor: "#7C4DFF",
+    backgroundColor: "#2563EB",
+
     paddingHorizontal: 18,
     paddingVertical: 10,
+
     borderRadius: 12,
   },
 
   addText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontWeight: "700",
     fontSize: 14,
   },
 
-  addedButton:{
-backgroundColor:"#E8F5E9",
-paddingHorizontal:18,
-paddingVertical:10,
-borderRadius:12,
-},
+  addedButton: {
+    backgroundColor: "#E8F5E9",
 
-addedText:{
-color:"#2E7D32",
-fontWeight:"700",
-},
+    paddingHorizontal: 18,
+    paddingVertical: 10,
 
-modalOverlay:{
-flex:1,
-backgroundColor:
-"rgba(0,0,0,0.45)",
-justifyContent:"center",
-alignItems:"center",
-},
+    borderRadius: 12,
+  },
 
-modalCard:{
-backgroundColor:"#fff",
-width:"82%",
-borderRadius:28,
-padding:25,
-alignItems:"center",
-},
+  addedText: {
+    color: "#2E7D32",
+    fontWeight: "700",
+  },
 
-modalTitle:{
-fontSize:24,
-fontWeight:"700",
-marginTop:15,
-},
+  modalOverlay: {
+    flex: 1,
 
-modalSubtitle:{
-fontSize:15,
-color:"#777",
-marginTop:8,
-textAlign:"center",
-},
+    backgroundColor:
+      "rgba(0,0,0,0.4)",
 
-modalButton:{
-marginTop:25,
-backgroundColor:"#7C4DFF",
-paddingHorizontal:35,
-paddingVertical:12,
-borderRadius:14,
-},
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-modalButtonText:{
-color:"#fff",
-fontWeight:"700",
-fontSize:16,
-},
-backButton: {
-  width: 45,
-  height: 45,
-  borderRadius: 22.5,
-  backgroundColor: "#FFFFFF",
+  modalCard: {
+    width: "85%",
 
-  justifyContent: "center",
-  alignItems: "center",
+    backgroundColor: "#FFFFFF",
 
-  marginRight: 15,
+    borderRadius: 28,
 
-  shadowColor: "#000",
-  shadowOpacity: 0.08,
-  shadowRadius: 8,
-  elevation: 3,
-},
+    padding: 25,
 
-header: {
-  flexDirection: "row",
-  alignItems: "center",
+    alignItems: "center",
+  },
 
-  paddingHorizontal: 20,
-  paddingTop: 10,
-  paddingBottom: 20,
-},
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+
+    color: "#1E293B",
+
+    marginTop: 15,
+  },
+
+  modalSubtitle: {
+    fontSize: 15,
+
+    color: "#64748B",
+
+    marginTop: 8,
+
+    textAlign: "center",
+  },
+
+  modalButton: {
+    marginTop: 25,
+
+    backgroundColor: "#2563EB",
+
+    paddingHorizontal: 35,
+    paddingVertical: 12,
+
+    borderRadius: 14,
+  },
+
+  modalButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 16,
+  },
 });

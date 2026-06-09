@@ -9,6 +9,8 @@ import {
   StyleSheet,
   Image,
   ScrollView,
+  Dimensions,
+  ImageBackground,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,12 +27,16 @@ import {
 import { auth, db } from "../services/firebase";
 
 import * as ImagePicker from "expo-image-picker";
-
+ const { width, height } = Dimensions.get("window");
 
 
 export default function CreateTripScreen({
   navigation,
 }) {
+
+ 
+
+
   const [destination, setDestination] =
     useState("");
   const [budget, setBudget] =
@@ -217,7 +223,14 @@ const uploadImageToCloudinary =
           .split("T")[0];
 
   return (
-  <SafeAreaView style={styles.container}>
+    
+<ImageBackground
+  source={require("../../assets/images/home-bg.png")}
+  style={styles.background}
+>
+  <View style={styles.overlayScreen}>
+    <SafeAreaView style={styles.container}>
+
   <TouchableOpacity
     style={styles.backBtn}
     onPress={() =>
@@ -275,7 +288,7 @@ const uploadImageToCloudinary =
           }}
         >
           <Text style={styles.dateText}>
-            📅 Start Date •{" "}
+             Start Date •{" "}
             {formatDate(startDate)}
           </Text>
         </TouchableOpacity>
@@ -288,7 +301,7 @@ const uploadImageToCloudinary =
           }}
         >
           <Text style={styles.dateText}>
-            📅 End Date •{" "}
+            End Date •{" "}
             {formatDate(endDate)}
           </Text>
         </TouchableOpacity>
@@ -398,144 +411,185 @@ const uploadImageToCloudinary =
       </Modal>
       
     </SafeAreaView>
+      </View>
+</ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 20,
+    backgroundColor: "transparent",
+    paddingHorizontal: width * 0.05,
   },
 
-backBtn: {
-  width: 42,
-  height: 42,
-  borderRadius: 21,
-  backgroundColor: "#F5F3FF",
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
 
-  justifyContent: "center",
-  alignItems: "center",
+  overlayScreen: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.78)",
+  },
 
-  marginTop: 10,
+  backBtn: {
+    width: width * 0.11,
+    height: width * 0.11,
+    borderRadius: width * 0.055,
 
-  zIndex: 9999,
-  elevation: 20,
-},
+    backgroundColor: "rgba(255,255,255,0.95)",
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    marginTop: height * 0.01,
+zIndex: 9999,
+    elevation: 3,
+  },
+
   logoContainer: {
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: height * 0.015,
   },
 
   logo: {
-    width: 120,
-    height: 120,
-    transform: [{ scale: 3 }],
+    width: width * 0.5,
+    height: width * 0.22,
+    transform:[{scale:2}],
   },
 
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    padding: 22,
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
+    backgroundColor: "rgba(255,255,255,0.88)",
 
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    borderRadius: width * 0.06,
 
-    elevation: 4,
+    padding: width * 0.055,
+
+    elevation: 6,
   },
 
   heading: {
-    fontSize: 24,
+    fontSize: width * 0.065,
     fontWeight: "700",
-    color: "#111827",
+    color: "#1E293B",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: height * 0.025,
   },
 
   input: {
-    height: 56,
-    backgroundColor: "#FAFAFA",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 14,
-    paddingHorizontal: 16,
+    minHeight: height * 0.07,
+
+    backgroundColor: "#FFFFFF",
+
+    borderWidth: 1.5,
+    borderColor: "#DCEBFF",
+
+    borderRadius: width * 0.04,
+
+    paddingHorizontal: width * 0.04,
+
     justifyContent: "center",
-    marginBottom: 14,
+
+    marginBottom: height * 0.018,
+
+    fontSize: width * 0.04,
+
+    color: "#1E293B",
+  },
+
+  dateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: width * 0.02,
   },
 
   dateText: {
-    color: "#111827",
-    fontSize: 15,
+    color: "#1E293B",
+    fontSize: width * 0.038,
+    fontWeight: "500",
   },
 
   button: {
-    height: 58,
-    backgroundColor: "#7C4DFF",
-    borderRadius: 16,
+    height: height * 0.07,
+
+    backgroundColor: "#2563EB",
+
+    borderRadius: width * 0.04,
+
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 10,
 
-    shadowColor: "#7C4DFF",
-    shadowOpacity: 0.18,
-    shadowRadius: 10,
-    elevation: 5,
+    marginTop: height * 0.012,
+
+    elevation: 6,
   },
 
   buttonText: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: width * 0.042,
     fontWeight: "700",
   },
 
   calendarContainer: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    borderRadius: width * 0.06,
     overflow: "hidden",
-    padding: 10,
+    padding: width * 0.025,
   },
 
   uploadButton: {
-  height: 56,
-  borderRadius: 14,
-  borderWidth: 1,
-  borderStyle: "dashed",
-  borderColor: "#7C4DFF",
-  justifyContent: "center",
-  alignItems: "center",
-  marginBottom: 15,
-},
+    height: height * 0.07,
 
-uploadText: {
-  color: "#7C4DFF",
-  fontWeight: "600",
-  fontSize: 15,
-},
+    borderRadius: width * 0.04,
 
-previewImage: {
-  width: "100%",
-  height: 180,
-  borderRadius: 14,
-  marginBottom: 15,
-},
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderColor: "#2563EB",
 
-removeImageButton: {
-  backgroundColor: "#FFE5E5",
-  borderRadius: 12,
-  paddingVertical: 12,
-  alignItems: "center",
-  marginBottom: 15,
-},
+    justifyContent: "center",
+    alignItems: "center",
 
-removeImageText: {
-  color: "#E53935",
-  fontWeight: "600",
-},
+    marginBottom: height * 0.02,
+
+    backgroundColor: "#F8FBFF",
+  },
+
+  uploadContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: width * 0.02,
+  },
+
+  uploadText: {
+    color: "#2563EB",
+    fontWeight: "600",
+    fontSize: width * 0.038,
+  },
+
+  previewImage: {
+    width: "100%",
+    height: width * 0.5,
+    borderRadius: width * 0.04,
+    marginBottom: height * 0.02,
+  },
+
+  removeImageButton: {
+    backgroundColor: "#FFF1F2",
+
+    borderRadius: width * 0.035,
+
+    paddingVertical: height * 0.018,
+
+    alignItems: "center",
+
+    marginBottom: height * 0.02,
+  },
+
+  removeImageText: {
+    color: "#DC2626",
+    fontWeight: "600",
+    fontSize: width * 0.038,
+  },
 });
