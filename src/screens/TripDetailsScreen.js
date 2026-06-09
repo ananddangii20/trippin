@@ -21,6 +21,7 @@ import {
   doc,
   updateDoc,
   onSnapshot,
+  collection,
 } from "firebase/firestore";
 
 import { db } from "../services/firebase";
@@ -34,6 +35,9 @@ export default function TripDetailsScreen({
   const [tripData, setTripData] =
     React.useState(null);
 
+  const [userProfiles, setUserProfiles] =
+    React.useState({});
+
   const {
     tripId,
     creatorId,
@@ -41,7 +45,6 @@ export default function TripDetailsScreen({
     date = "",
     image,
     budget = 0,
-    collected = 0,
     members = [],
   } = route.params || {};
 
@@ -93,38 +96,91 @@ export default function TripDetailsScreen({
     return unsub;
   }, [tripId]);
 
+  React.useEffect(() => {
+    const unsub = onSnapshot(
+      collection(db, "users"),
+      (snapshot) => {
+        const profiles = {};
+
+        snapshot.docs.forEach((userDoc) => {
+          const data = userDoc.data();
+          const uid = data.uid || userDoc.id;
+
+          profiles[uid] = {
+            uid,
+            username:
+              data.username || "User",
+            photoURL:
+              data.photoURL || "",
+          };
+        });
+
+        setUserProfiles(profiles);
+      }
+    );
+
+    return unsub;
+  }, []);
+
   const liveBudget =
     tripData?.budget || budget;
 
-const liveMembers =
-  tripData?.members || members;
+  const liveMembers =
+    tripData?.members || members;
 
-const payments =
-  tripData?.payments || {};
+  const payments =
+    tripData?.payments || {};
 
-const liveCollected =
-  Object.values(payments).reduce(
-    (sum, payment) =>
-      sum + (payment.amount || 0),
-    0
-  );
+  const liveCollected =
+    Object.values(payments).reduce(
+      (sum, payment) =>
+        sum + (payment.amount || 0),
+      0
+    );
 
   const financeLocked =
     tripData?.financeLocked || false;
 
   const paymentWindowOpen =
     tripData?.paymentWindowOpen || false;
-const activeMembers =
-  liveMembers.filter((member) => {
+
+  const getMemberUid = (member) => {
     if (typeof member === "string") {
-      return true;
+      return member;
     }
 
-    return (
-      member.status !== "left" &&
-      member.status !== "removed"
+    return member?.uid;
+  };
+
+  const getMemberStatus = (member) => {
+    if (typeof member === "string") {
+      return "active";
+    }
+
+    return member?.status || "active";
+  };
+
+  const activeMembers =
+    liveMembers.filter((member) => {
+      const status =
+        getMemberStatus(member);
+
+      return (
+        status !== "left" &&
+        status !== "removed"
+      );
+    });
+
+  const currentMember =
+    liveMembers.find(
+      (member) =>
+        getMemberUid(member) === user?.uid
     );
-  });
+
+  const isCurrentMemberActive =
+    currentMember &&
+    getMemberStatus(currentMember) ===
+      "active";
 
   const totalMembers =
     activeMembers.length || 1;
@@ -149,16 +205,19 @@ const activeMembers =
     paymentWindowOpen &&
     remainingAmount > 0;
 
- const progress =
-  liveBudget > 0
-    ? Math.min(
-        Math.round(
-          (liveCollected / liveBudget) *
-            100
-        ),
-        100
-      )
-    : 0;
+  const progress =
+    liveBudget > 0
+      ? Math.min(
+          Math.round(
+            (liveCollected / liveBudget) *
+              100
+          ),
+          100
+        )
+      : 0;
+
+  const visibleAvatars =
+    activeMembers.slice(0, 3);
 
   const handlePayment = () => {
     if (!canPay) {
@@ -188,8 +247,9 @@ const activeMembers =
               await updateDoc(
                 doc(db, "trips", tripId),
                 {
-             collected:
-  liveCollected + remainingAmount,
+                  collected:
+                    liveCollected +
+                    remainingAmount,
 
                   [`payments.${user.uid}`]: {
                     amount: newTotalPaid,
@@ -219,46 +279,182 @@ const activeMembers =
   };
 
   const deleteTrip = () => {
-  if (
-    financeLocked ||
-    paymentWindowOpen
-  ) {
+    if (
+      financeLocked ||
+      paymentWindowOpen
+    ) {
+      Alert.alert(
+        "Finance Locked",
+        "Trip cannot be deleted after payment window opens."
+      );
+      return;
+    }
+
     Alert.alert(
-      "Finance Locked",
-      "Trip cannot be deleted after payment window opens."
-    );
-    return;
-  }
-
-  Alert.alert(
-    "Delete Group",
-    "Are you sure you want to delete this group?",
-    [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteDoc(
-              doc(db, "trips", tripId)
-            );
-
-            navigation.navigate("Trips");
-          } catch (e) {
-            Alert.alert(
-              "Error",
-              e.message
-            );
-          }
+      "Delete Group",
+      "Are you sure you want to delete this group?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
         },
-      },
-    ]
-  );
-};
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteDoc(
+                doc(db, "trips", tripId)
+              );
+
+              navigation.navigate("Trips");
+            } catch (e) {
+              Alert.alert(
+                "Error",
+                e.message
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const leaveGroup = () => {
+    if (
+      financeLocked ||
+      paymentWindowOpen
+    ) {
+      Alert.alert(
+        "Finance Locked",
+        "You cannot leave the group after payment window opens."
+      );
+      return;
+    }
+
+    if (!isCurrentMemberActive) {
+      Alert.alert(
+        "Already Left",
+        "You are no longer an active member of this group."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Leave Group",
+      "Are you sure you want to leave this group?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Leave",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const updatedMembers =
+                liveMembers.map((member) => {
+                  const memberUid =
+                    getMemberUid(member);
+
+                  if (
+                    memberUid === user.uid
+                  ) {
+                    return {
+                      ...(typeof member ===
+                      "object"
+                        ? member
+                        : {}),
+                      uid: user.uid,
+                      status: "left",
+                      leftAt:
+                        new Date().toISOString(),
+                    };
+                  }
+
+                  return member;
+                });
+
+              await updateDoc(
+                doc(db, "trips", tripId),
+                {
+                  members: updatedMembers,
+                }
+              );
+
+              Alert.alert(
+                "Success",
+                "You left the group."
+              );
+
+              navigation.navigate("Trips");
+            } catch (e) {
+              Alert.alert(
+                "Error",
+                e.message
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const renderAvatar = (
+    member,
+    index
+  ) => {
+    const uid =
+      getMemberUid(member);
+
+    const profile =
+      userProfiles[uid];
+
+    const photoURL =
+      profile?.photoURL;
+
+    if (photoURL) {
+      return (
+        <Image
+          key={uid}
+          source={{
+            uri: photoURL,
+          }}
+          style={[
+            styles.avatar,
+            index !== 0 && {
+              marginLeft: -12,
+            },
+          ]}
+        />
+      );
+    }
+
+    return (
+      <View
+        key={uid}
+        style={[
+          styles.avatar,
+          {
+            marginLeft:
+              index !== 0 ? -12 : 0,
+            backgroundColor: "#E5E7EB",
+            justifyContent: "center",
+            alignItems: "center",
+            borderWidth: 2,
+            borderColor: "#fff",
+          },
+        ]}
+      >
+        <Ionicons
+          name="person"
+          size={20}
+          color="#64748B"
+        />
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -289,7 +485,20 @@ const activeMembers =
           </Text>
         </View>
 
-        <View style={styles.headerSide} />
+        {isCurrentMemberActive ? (
+          <TouchableOpacity
+            style={styles.headerSide}
+            onPress={leaveGroup}
+          >
+            <Ionicons
+              name="exit-outline"
+              size={24}
+              color="#DC2626"
+            />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.headerSide} />
+        )}
       </View>
 
       <ScrollView
@@ -312,32 +521,21 @@ const activeMembers =
           <View
             style={styles.avatarContainer}
           >
-            <Image
-              source={require("../../assets/images/user1.png")}
-              style={styles.avatar}
-            />
+            {visibleAvatars.map(
+              (member, index) =>
+                renderAvatar(
+                  member,
+                  index
+                )
+            )}
 
-            <Image
-              source={require("../../assets/images/user2.png")}
-              style={[
-                styles.avatar,
-                { marginLeft: -12 },
-              ]}
-            />
-
-            <Image
-              source={require("../../assets/images/user3.png")}
-              style={[
-                styles.avatar,
-                { marginLeft: -12 },
-              ]}
-            />
-
-            <View style={styles.moreAvatar}>
-              <Text style={styles.moreText}>
-                +{Math.max(totalMembers - 3, 0)}
-              </Text>
-            </View>
+            {totalMembers > 3 && (
+              <View style={styles.moreAvatar}>
+                <Text style={styles.moreText}>
+                  +{totalMembers - 3}
+                </Text>
+              </View>
+            )}
           </View>
         </ImageBackground>
 
@@ -386,6 +584,47 @@ const activeMembers =
             View All Members
           </Text>
         </TouchableOpacity>
+        {user?.uid === creatorId &&
+  !financeLocked &&
+  !paymentWindowOpen && (
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate(
+          "CreateTrip",
+          {
+            tripId,
+          }
+        )
+      }
+      style={{
+        marginHorizontal: 20,
+        marginTop: 12,
+        backgroundColor: "#EEF2FF",
+        paddingVertical: 14,
+        borderRadius: 16,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Ionicons
+        name="create-outline"
+        size={20}
+        color="#2563EB"
+      />
+
+      <Text
+        style={{
+          marginLeft: 8,
+          color: "#2563EB",
+          fontWeight: "800",
+          fontSize: 15,
+        }}
+      >
+        Edit Trip Details
+      </Text>
+    </TouchableOpacity>
+  )}
 
         <View style={styles.budgetProgressCard}>
           <View
@@ -497,10 +736,7 @@ const activeMembers =
               style={[
                 styles.progressFill,
                 {
-                  width: `${Math.min(
-                    progress,
-                    100
-                  )}%`,
+                  width: `${progress}%`,
                 },
               ]}
             />
@@ -704,95 +940,6 @@ const activeMembers =
               Media
             </Text>
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.timelineContainer}>
-          <View style={styles.timelineHeader}>
-            <Text
-              style={styles.sectionTitle}
-            >
-              Upcoming
-            </Text>
-
-            <TouchableOpacity>
-              <Text style={styles.viewAll}>
-                View all
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.timelineItem}>
-            <View
-              style={styles.timelineDot}
-            />
-
-            <View
-              style={styles.timelineContent}
-            >
-              <Text
-                style={styles.timelineTime}
-              >
-                12 Jun • 2:00 PM
-              </Text>
-
-              <Text
-                style={
-                  styles.timelineTitle
-                }
-              >
-                Check-in at Hotel Ocean
-                View
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.timelineItem}>
-            <View
-              style={styles.timelineDot}
-            />
-
-            <View
-              style={styles.timelineContent}
-            >
-              <Text
-                style={styles.timelineTime}
-              >
-                13 Jun • 4:00 PM
-              </Text>
-
-              <Text
-                style={
-                  styles.timelineTitle
-                }
-              >
-                Calangute Beach Visit
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.timelineItem}>
-            <View
-              style={styles.timelineDot}
-            />
-
-            <View
-              style={styles.timelineContent}
-            >
-              <Text
-                style={styles.timelineTime}
-              >
-                13 Jun • 9:00 PM
-              </Text>
-
-              <Text
-                style={
-                  styles.timelineTitle
-                }
-              >
-                Dinner at Britto's
-              </Text>
-            </View>
-          </View>
         </View>
 
         {user?.uid === creatorId && (

@@ -63,14 +63,15 @@ export default StyleSheet.create({
     elevation: 5,
   },
 
-  title: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#1E293B",
-    marginHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 15,
-  },
+  // title: {
+  //   fontSize: 28,
+  //   fontWeight: "700",
+  //   color: "#1E293B",
+  //   marginHorizontal: 20,
+  //   marginTop: 20,
+  //   marginBottom: 15,
+  //   textAlign:"center",
+  // },
 
   card: {
     height: 190,

@@ -16,6 +16,8 @@ import ProfileScreen from "../screens/ProfileScreen";
 import ChatScreen from "../screens/ChatScreen";
 import AddMembersScreen from "../screens/AddMembersScreen";
 import ViewMembersScreen from "../screens/ViewMembersScreen";
+import NotificationsScreen from "../screens/NotificationsScreen";
+
 import { useAuth } from "../context/AuthContext";
 
 const Stack = createNativeStackNavigator();
@@ -81,6 +83,13 @@ export default function AppNavigator() {
          <Stack.Screen
   name="CreateTrip"
   component={CreateTripScreen}
+/>
+<Stack.Screen
+  name="Notifications"
+  component={NotificationsScreen}
+  options={{
+    headerShown: false,
+  }}
 />
 
 <Stack.Screen

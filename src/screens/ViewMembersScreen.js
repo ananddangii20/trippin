@@ -33,26 +33,14 @@ export default function ViewMembersScreen({
   navigation,
 }) {
   const { tripId } = route.params;
-
   const { user } = useAuth();
 
-  const [members, setMembers] =
-    useState([]);
-
-  const [creatorId, setCreatorId] =
-    useState("");
-
-  const [payments, setPayments] =
-    useState({});
-
-  const [budget, setBudget] =
-    useState(0);
-
-  const [financeLocked, setFinanceLocked] =
-    useState(false);
-
-  const [paymentWindowOpen, setPaymentWindowOpen] =
-    useState(false);
+  const [members, setMembers] = useState([]);
+  const [creatorId, setCreatorId] = useState("");
+  const [payments, setPayments] = useState({});
+  const [budget, setBudget] = useState(0);
+  const [financeLocked, setFinanceLocked] = useState(false);
+  const [paymentWindowOpen, setPaymentWindowOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -65,56 +53,45 @@ export default function ViewMembersScreen({
         setCreatorId(trip.userId);
         setPayments(trip.payments || {});
         setBudget(trip.budget || 0);
-        setFinanceLocked(
-          trip.financeLocked || false
+        setFinanceLocked(trip.financeLocked || false);
+        setPaymentWindowOpen(trip.paymentWindowOpen || false);
+
+        const tripMembers = trip.members || [];
+
+        const usersSnapshot = await getDocs(
+          collection(db, "users")
         );
-        setPaymentWindowOpen(
-          trip.paymentWindowOpen || false
-        );
 
-        const tripMembers =
-          trip.members || [];
+        const usersList = usersSnapshot.docs.map((userDoc) => ({
+          id: userDoc.id,
+          uid: userDoc.data().uid || userDoc.id,
+          ...userDoc.data(),
+        }));
 
-        const usersSnapshot =
-          await getDocs(
-            collection(db, "users")
-          );
+        const finalMembers = tripMembers
+          .map((tripMember) => {
+            const memberUid =
+              typeof tripMember === "string"
+                ? tripMember
+                : tripMember.uid;
 
-        const usersList =
-          usersSnapshot.docs.map(
-            (userDoc) => ({
-              id: userDoc.id,
-              ...userDoc.data(),
-            })
-          );
+            const memberStatus =
+              typeof tripMember === "string"
+                ? "active"
+                : tripMember.status || "active";
 
-        const finalMembers =
-          tripMembers
-            .map((tripMember) => {
-              const memberUid =
-                typeof tripMember === "string"
-                  ? tripMember
-                  : tripMember.uid;
+            const userData = usersList.find(
+              (item) => item.uid === memberUid
+            );
 
-              const memberStatus =
-                typeof tripMember === "string"
-                  ? "active"
-                  : tripMember.status || "active";
+            if (!userData) return null;
 
-              const userData =
-                usersList.find(
-                  (item) =>
-                    item.uid === memberUid
-                );
-
-              if (!userData) return null;
-
-              return {
-                ...userData,
-                status: memberStatus,
-              };
-            })
-            .filter(Boolean);
+            return {
+              ...userData,
+              status: memberStatus,
+            };
+          })
+          .filter(Boolean);
 
         setMembers(finalMembers);
       }
@@ -123,37 +100,27 @@ export default function ViewMembersScreen({
     return unsubscribe;
   }, [tripId]);
 
-  const activeMembers =
-    members.filter(
-      (member) =>
-        member.status !== "left" &&
-        member.status !== "removed"
-    );
+  const activeMembers = members.filter(
+    (member) =>
+      member.status !== "left" &&
+      member.status !== "removed"
+  );
 
-  const activeMemberCount =
-    activeMembers.length || 1;
+  const activeMemberCount = activeMembers.length || 1;
 
-  const perPerson =
-    Math.ceil(budget / activeMemberCount);
+  const perPerson = Math.ceil(budget / activeMemberCount);
 
-  const totalPaid =
-    Object.values(payments).reduce(
-      (sum, payment) =>
-        sum + (payment.amount || 0),
-      0
-    );
+  const totalPaid = Object.values(payments).reduce(
+    (sum, payment) => sum + (payment.amount || 0),
+    0
+  );
 
-  const totalRequired =
-    perPerson * activeMemberCount;
+  const totalRequired = perPerson * activeMemberCount;
 
-  const totalPending =
-    Math.max(totalRequired - totalPaid, 0);
+  const totalPending = Math.max(totalRequired - totalPaid, 0);
 
   const removeMember = (uid) => {
-    if (
-      financeLocked ||
-      paymentWindowOpen
-    ) {
+    if (financeLocked || paymentWindowOpen) {
       Alert.alert(
         "Finance Locked",
         "Members cannot be removed after payment window opens."
@@ -172,33 +139,108 @@ export default function ViewMembersScreen({
           text: "Remove",
           style: "destructive",
           onPress: async () => {
-            const updatedMembers =
-              members.map((member) => {
-                if (member.uid === uid) {
-                  return {
-                    uid: member.uid,
-                    status: "removed",
-                    removedAt:
-                      new Date().toISOString(),
-                  };
-                }
-
+            const updatedMembers = members.map((member) => {
+              if (member.uid === uid) {
                 return {
                   uid: member.uid,
-                  status:
-                    member.status || "active",
+                  status: "removed",
+                  removedAt: new Date().toISOString(),
                 };
-              });
-
-            await updateDoc(
-              doc(db, "trips", tripId),
-              {
-                members: updatedMembers,
               }
-            );
+
+              return {
+                uid: member.uid,
+                status: member.status || "active",
+              };
+            });
+
+            await updateDoc(doc(db, "trips", tripId), {
+              members: updatedMembers,
+            });
           },
         },
       ]
+    );
+  };
+
+  const renderAvatar = (item) => {
+    if (item.photoURL) {
+      return (
+        <Image
+          source={{ uri: item.photoURL }}
+          style={styles.avatar}
+        />
+      );
+    }
+
+    return (
+      <View
+        style={[
+          styles.avatar,
+          {
+            backgroundColor: "#E5E7EB",
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        ]}
+      >
+        <Ionicons
+          name="person"
+          size={24}
+          color="#64748B"
+        />
+      </View>
+    );
+  };
+
+  const renderSummaryBox = (
+    label,
+    value,
+    icon,
+    color,
+    bg
+  ) => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: bg,
+          borderRadius: 16,
+          paddingVertical: 14,
+          paddingHorizontal: 10,
+          marginHorizontal: 4,
+          alignItems: "center",
+        }}
+      >
+        <Ionicons
+          name={icon}
+          size={20}
+          color={color}
+        />
+
+        <Text
+          style={{
+            marginTop: 8,
+            fontSize: 17,
+            fontWeight: "900",
+            color,
+          }}
+        >
+          {value}
+        </Text>
+
+        <Text
+          style={{
+            marginTop: 3,
+            fontSize: 11,
+            fontWeight: "700",
+            color: "#64748B",
+            textAlign: "center",
+          }}
+        >
+          {label}
+        </Text>
+      </View>
     );
   };
 
@@ -207,9 +249,7 @@ export default function ViewMembersScreen({
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() =>
-            navigation.goBack()
-          }
+          onPress={() => navigation.goBack()}
         >
           <Ionicons
             name="chevron-back"
@@ -219,36 +259,27 @@ export default function ViewMembersScreen({
         </TouchableOpacity>
 
         <View style={styles.headerText}>
-          <Text style={styles.title}>
-            Members
-          </Text>
+          <Text style={styles.title}>Members</Text>
 
           <Text style={styles.subtitle}>
-            Group participants
+            Payments & participants
           </Text>
         </View>
 
         {user?.uid === creatorId && (
           <TouchableOpacity
-            disabled={
-              financeLocked ||
-              paymentWindowOpen
-            }
+            disabled={financeLocked || paymentWindowOpen}
             onPress={() =>
-              navigation.navigate(
-                "AddMembers",
-                {
-                  tripId,
-                }
-              )
+              navigation.navigate("AddMembers", {
+                tripId,
+              })
             }
             style={{
               width: 42,
               height: 42,
               borderRadius: 21,
               backgroundColor:
-                financeLocked ||
-                paymentWindowOpen
+                financeLocked || paymentWindowOpen
                   ? "#CBD5E1"
                   : "#2563EB",
               justifyContent: "center",
@@ -264,66 +295,65 @@ export default function ViewMembersScreen({
         )}
       </View>
 
-      <Text style={styles.memberCount}>
-        {activeMembers.length}
-        {activeMembers.length === 1
-          ? " Active Member"
-          : " Active Members"}
-      </Text>
-
       <View
         style={{
           marginHorizontal: 20,
-          marginBottom: 16,
-          padding: 16,
-          borderRadius: 18,
-          backgroundColor: "#EFF6FF",
+          marginTop: 8,
+          marginBottom: 18,
         }}
       >
         <Text
           style={{
+            fontSize: 14,
             fontWeight: "800",
-            fontSize: 16,
-            color: "#111827",
-            marginBottom: 10,
-          }}
-        >
-          Payment Summary
-        </Text>
-
-        <Text
-          style={{
             color: "#475569",
-            fontWeight: "600",
-            marginBottom: 4,
+            marginBottom: 12,
           }}
         >
-          Per Person: ₹{perPerson}
+          {activeMembers.length} Active Members
         </Text>
 
-        <Text
+        <View
           style={{
-            color: "#16A34A",
-            fontWeight: "700",
-            marginBottom: 4,
+            flexDirection: "row",
+            marginHorizontal: -4,
           }}
         >
-          Total Paid: ₹{totalPaid}
-        </Text>
+          {renderSummaryBox(
+            "Per Person",
+            `₹${perPerson}`,
+            "person-outline",
+            "#2563EB",
+            "#EFF6FF"
+          )}
 
-        <Text
-          style={{
-            color: "#DC2626",
-            fontWeight: "700",
-          }}
-        >
-          Total Pending: ₹{totalPending}
-        </Text>
+          {renderSummaryBox(
+            "Paid",
+            `₹${totalPaid}`,
+            "checkmark-circle-outline",
+            "#16A34A",
+            "#ECFDF5"
+          )}
+
+          {renderSummaryBox(
+            "Pending",
+            `₹${totalPending}`,
+            "time-outline",
+            "#DC2626",
+            "#FEF2F2"
+          )}
+        </View>
       </View>
 
       <FlatList
         data={members}
-        keyExtractor={(item) => item.uid}
+        keyExtractor={(item, index) =>
+          `${item.uid}-${index}`
+        }
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingBottom: 30,
+        }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons
@@ -342,124 +372,209 @@ export default function ViewMembersScreen({
           </View>
         }
         renderItem={({ item }) => {
-          const payment =
-            payments?.[item.uid] || {};
+          const payment = payments?.[item.uid] || {};
 
-          const paidAmount =
-            payment.amount || 0;
+          const paidAmount = payment.amount || 0;
 
-          const pendingAmount =
-            Math.max(
-              perPerson - paidAmount,
-              0
-            );
+          const pendingAmount = Math.max(
+            perPerson - paidAmount,
+            0
+          );
 
-          const creditAmount =
-            Math.max(
-              paidAmount - perPerson,
-              0
-            );
+          const creditAmount = Math.max(
+            paidAmount - perPerson,
+            0
+          );
 
-          const paymentStatus =
-            pendingAmount === 0
-              ? "Paid"
-              : "Pending";
+          const isPaid = pendingAmount === 0;
 
           return (
-            <View style={styles.memberCard}>
-              <View style={styles.leftSection}>
-                <Image
-                  source={{
-                    uri:
-                      item.photoURL ||
-                      "https://ui-avatars.com/api/?name=" +
-                        item.username,
-                  }}
-                  style={styles.avatar}
-                />
+            <View
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: 20,
+                padding: 16,
+                marginBottom: 14,
+                borderWidth: 1,
+                borderColor: "#E5E7EB",
+                shadowColor: "#000",
+                shadowOpacity: 0.04,
+                shadowRadius: 8,
+                shadowOffset: {
+                  width: 0,
+                  height: 3,
+                },
+                elevation: 2,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                {renderAvatar(item)}
 
-                <View style={styles.info}>
-                  <Text style={styles.username}>
+                <View
+                  style={{
+                    flex: 1,
+                    marginLeft: 12,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "900",
+                      color: "#111827",
+                    }}
+                  >
                     {item.uid === user.uid
                       ? `${item.username} (You)`
                       : item.username}
                   </Text>
 
-                  {item.uid === creatorId && (
-                    <Text style={styles.adminText}>
-                      Group Admin
-                    </Text>
-                  )}
-
-                  <Text
+                  <View
                     style={{
-                      marginTop: 5,
-                      color: "#16A34A",
-                      fontWeight: "700",
-                      fontSize: 13,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 6,
+                      flexWrap: "wrap",
                     }}
                   >
-                    Paid ₹{paidAmount}
-                  </Text>
+                    {item.uid === creatorId && (
+                      <View
+                        style={{
+                          backgroundColor: "#EEF2FF",
+                          paddingHorizontal: 9,
+                          paddingVertical: 4,
+                          borderRadius: 20,
+                          marginRight: 6,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "#4F46E5",
+                            fontWeight: "800",
+                            fontSize: 11,
+                          }}
+                        >
+                          Admin
+                        </Text>
+                      </View>
+                    )}
 
-                  {creditAmount > 0 ? (
-                    <Text
+                    <View
                       style={{
-                        marginTop: 3,
-                        color: "#2563EB",
-                        fontWeight: "700",
-                        fontSize: 13,
+                        backgroundColor:
+                          item.status === "active"
+                            ? "#F1F5F9"
+                            : "#FEF2F2",
+                        paddingHorizontal: 9,
+                        paddingVertical: 4,
+                        borderRadius: 20,
                       }}
                     >
-                      Credit ₹{creditAmount}
-                    </Text>
-                  ) : (
-                    <Text
-                      style={{
-                        marginTop: 3,
-                        color: "#DC2626",
-                        fontWeight: "700",
-                        fontSize: 13,
-                      }}
-                    >
-                      Pending ₹{pendingAmount}
-                    </Text>
-                  )}
+                      <Text
+                        style={{
+                          color:
+                            item.status === "active"
+                              ? "#475569"
+                              : "#DC2626",
+                          fontWeight: "800",
+                          fontSize: 11,
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {item.status}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
 
+                <View
+                  style={{
+                    backgroundColor: isPaid
+                      ? "#ECFDF5"
+                      : "#FEF2F2",
+                    paddingHorizontal: 12,
+                    paddingVertical: 7,
+                    borderRadius: 20,
+                  }}
+                >
                   <Text
                     style={{
-                      marginTop: 3,
-                      color:
-                        item.status === "active"
-                          ? "#64748B"
-                          : "#EF4444",
-                      fontWeight: "700",
+                      color: isPaid ? "#16A34A" : "#DC2626",
+                      fontWeight: "900",
                       fontSize: 12,
-                      textTransform: "capitalize",
                     }}
                   >
-                    Member Status: {item.status}
+                    {isPaid ? "Paid" : "Pending"}
                   </Text>
                 </View>
               </View>
 
               <View
                 style={{
-                  alignItems: "flex-end",
+                  flexDirection: "row",
+                  marginTop: 16,
+                  backgroundColor: "#F8FAFC",
+                  borderRadius: 16,
+                  padding: 12,
                 }}
               >
-                <Text
-                  style={{
-                    color:
-                      paymentStatus === "Paid"
-                        ? "#22C55E"
-                        : "#EF4444",
-                    fontWeight: "700",
-                    fontSize: 14,
-                  }}
-                >
-                  Status: {paymentStatus}
-                </Text>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      color: "#64748B",
+                      fontWeight: "700",
+                      fontSize: 12,
+                    }}
+                  >
+                    Paid
+                  </Text>
+
+                  <Text
+                    style={{
+                      marginTop: 4,
+                      color: "#16A34A",
+                      fontWeight: "900",
+                      fontSize: 15,
+                    }}
+                  >
+                    ₹{paidAmount}
+                  </Text>
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      color: "#64748B",
+                      fontWeight: "700",
+                      fontSize: 12,
+                    }}
+                  >
+                    {creditAmount > 0
+                      ? "Credit"
+                      : "Pending"}
+                  </Text>
+
+                  <Text
+                    style={{
+                      marginTop: 4,
+                      color:
+                        creditAmount > 0
+                          ? "#2563EB"
+                          : "#DC2626",
+                      fontWeight: "900",
+                      fontSize: 15,
+                    }}
+                  >
+                    ₹
+                    {creditAmount > 0
+                      ? creditAmount
+                      : pendingAmount}
+                  </Text>
+                </View>
 
                 {user.uid === creatorId &&
                   item.uid !== creatorId &&
@@ -470,7 +585,12 @@ export default function ViewMembersScreen({
                         paymentWindowOpen
                       }
                       style={{
-                        marginTop: 10,
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        backgroundColor: "#FEF2F2",
+                        justifyContent: "center",
+                        alignItems: "center",
                         opacity:
                           financeLocked ||
                           paymentWindowOpen
@@ -482,9 +602,9 @@ export default function ViewMembersScreen({
                       }
                     >
                       <Ionicons
-                        name="trash"
-                        size={20}
-                        color="#FF4D4F"
+                        name="trash-outline"
+                        size={19}
+                        color="#DC2626"
                       />
                     </TouchableOpacity>
                   )}

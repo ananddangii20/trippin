@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
 
 import {
   View,
@@ -22,28 +25,37 @@ import {
   collection,
   addDoc,
   serverTimestamp,
+  doc,
+  getDoc,
+  updateDoc,
 } from "firebase/firestore";
 
 import { auth, db } from "../services/firebase";
-
 import * as ImagePicker from "expo-image-picker";
- const { width, height } = Dimensions.get("window");
 
+const { width, height } =
+  Dimensions.get("window");
 
 export default function CreateTripScreen({
+  route,
   navigation,
 }) {
+  const editTripId =
+    route?.params?.tripId || null;
 
- 
-
+  const isEditMode = !!editTripId;
 
   const [destination, setDestination] =
     useState("");
+
   const [budget, setBudget] =
     useState("");
 
-    const [image, setImage] =
-  useState(null);
+  const [image, setImage] =
+    useState(null);
+
+  const [existingImage, setExistingImage] =
+    useState(null);
 
   const [startDate, setStartDate] =
     useState(new Date());
@@ -57,20 +69,105 @@ export default function CreateTripScreen({
   const [selecting, setSelecting] =
     useState("start");
 
- const formatDate = (date) => {
-  const day = String(
-    date.getDate()
-  ).padStart(2, "0");
+  useEffect(() => {
+    if (!isEditMode) return;
 
-  const month = String(
-    date.getMonth() + 1
-  ).padStart(2, "0");
+    const fetchTrip = async () => {
+      try {
+        const tripRef = doc(
+          db,
+          "trips",
+          editTripId
+        );
 
-  const year =
-    date.getFullYear();
+        const tripSnap =
+          await getDoc(tripRef);
 
-  return `${day}/${month}/${year}`;
-};
+        if (!tripSnap.exists()) {
+          Alert.alert(
+            "Error",
+            "Trip not found"
+          );
+          navigation.goBack();
+          return;
+        }
+
+        const trip = tripSnap.data();
+
+        if (
+          trip.userId !==
+          auth.currentUser.uid
+        ) {
+          Alert.alert(
+            "Not Allowed",
+            "Only trip creator can edit this trip."
+          );
+          navigation.goBack();
+          return;
+        }
+
+        if (
+          trip.financeLocked ||
+          trip.paymentWindowOpen
+        ) {
+          Alert.alert(
+            "Finance Locked",
+            "Trip details cannot be edited after payment window opens."
+          );
+          navigation.goBack();
+          return;
+        }
+
+        setDestination(
+          trip.destination || ""
+        );
+
+        setBudget(
+          trip.budget
+            ? String(trip.budget)
+            : ""
+        );
+
+        setExistingImage(
+          trip.coverImage || null
+        );
+
+        if (trip.startDate) {
+          setStartDate(
+            new Date(trip.startDate)
+          );
+        }
+
+        if (trip.endDate) {
+          setEndDate(
+            new Date(trip.endDate)
+          );
+        }
+      } catch (error) {
+        Alert.alert(
+          "Error",
+          error.message
+        );
+      }
+    };
+
+    fetchTrip();
+  }, [editTripId]);
+
+  const formatDate = (date) => {
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+    const year =
+      date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
 
   const getStatus = () => {
     const today = new Date();
@@ -90,62 +187,61 @@ export default function CreateTripScreen({
   };
 
   const pickImage = async () => {
-  const permission =
-    await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permission =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-  if (!permission.granted) {
-    Alert.alert(
-      "Permission Required",
-      "Please allow gallery access."
-    );
-    return;
-  }
+    if (!permission.granted) {
+      Alert.alert(
+        "Permission Required",
+        "Please allow gallery access."
+      );
+      return;
+    }
 
-const result =
-  await ImagePicker.launchImageLibraryAsync({
-    allowsEditing: true,
-    aspect: [16, 9],
-    quality: 0.6,
-  });
+    const result =
+      await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.6,
+      });
 
-
-  if (!result.canceled) {
-    setImage(result.assets[0].uri);
-  }
-};
-
-const uploadImageToCloudinary =
-  async () => {
-    if (!image) return null;
-
-    const formData = new FormData();
-
-    formData.append("file", {
-      uri: image,
-      type: "image/jpeg",
-      name: "trip.jpg",
-    });
-
-    formData.append(
-      "upload_preset",
-      "trip_planner"
-    );
-
-    const response = await fetch(
-      "https://api.cloudinary.com/v1_1/dbyrgfhu9/image/upload",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-
-    const data =
-      await response.json();
-
-    return data.secure_url;
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
   };
 
-  const createTrip = async () => {
+  const uploadImageToCloudinary =
+    async () => {
+      if (!image) return existingImage;
+
+      const formData = new FormData();
+
+      formData.append("file", {
+        uri: image,
+        type: "image/jpeg",
+        name: "trip.jpg",
+      });
+
+      formData.append(
+        "upload_preset",
+        "trip_planner"
+      );
+
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dbyrgfhu9/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data =
+        await response.json();
+
+      return data.secure_url;
+    };
+
+  const saveTrip = async () => {
     if (
       !destination.trim() ||
       !budget.trim()
@@ -165,39 +261,76 @@ const uploadImageToCloudinary =
       return;
     }
 
-  try {
-  const imageUrl =
-    await uploadImageToCloudinary();
+    try {
+      const imageUrl =
+        await uploadImageToCloudinary();
 
-  await addDoc(
-  collection(db, "trips"),
-  {
-    title: destination,
-    destination,
-    coverImage: imageUrl,
-    budget: Number(budget),
-    collected: 0,
-    progress: 0,
+      if (isEditMode) {
+        await updateDoc(
+          doc(db, "trips", editTripId),
+          {
+            title: destination,
+            destination,
+            coverImage: imageUrl,
+            budget: Number(budget),
+            startDate:
+              startDate.toISOString(),
+            endDate:
+              endDate.toISOString(),
+            status: getStatus(),
+            updatedAt:
+              serverTimestamp(),
+          }
+        );
 
-    startDate:
-      startDate.toISOString(),
+        Alert.alert(
+          "Success",
+          "Trip Updated Successfully"
+        );
 
-    endDate:
-      endDate.toISOString(),
+        navigation.goBack();
+        return;
+      }
 
-    status: getStatus(),
+      await addDoc(
+        collection(db, "trips"),
+        {
+          title: destination,
+          destination,
+          coverImage: imageUrl,
+          budget: Number(budget),
+          collected: 0,
+          progress: 0,
 
-    userId:
-      auth.currentUser.uid,
+          startDate:
+            startDate.toISOString(),
 
-    members: [
-      auth.currentUser.uid,
-    ],
+          endDate:
+            endDate.toISOString(),
 
-    createdAt:
-      serverTimestamp(),
-  }
-);
+          status: getStatus(),
+
+          userId:
+            auth.currentUser.uid,
+
+          members: [
+            {
+              uid: auth.currentUser.uid,
+              status: "active",
+              joinedAt:
+                new Date().toISOString(),
+            },
+          ],
+
+          payments: {},
+
+          financeLocked: false,
+          paymentWindowOpen: false,
+
+          createdAt:
+            serverTimestamp(),
+        }
+      );
 
       Alert.alert(
         "Success",
@@ -223,196 +356,195 @@ const uploadImageToCloudinary =
           .split("T")[0];
 
   return (
-    
-<ImageBackground
-  source={require("../../assets/images/home-bg.png")}
-  style={styles.background}
->
-  <View style={styles.overlayScreen}>
-    <SafeAreaView style={styles.container}>
-
-  <TouchableOpacity
-    style={styles.backBtn}
-    onPress={() =>
-      navigation.navigate("Trips")
-    }
-  >
-    <Ionicons
-      name="chevron-back"
-      size={24}
-      color="#7C4DFF"
-    />
-  </TouchableOpacity>
-
-  <View style={styles.logoContainer}>
-    <Image
-      source={require("../../assets/images/logo.png")}
-      style={styles.logo}
-      resizeMode="contain"
-    />
-  </View>
-
-  <ScrollView
-    showsVerticalScrollIndicator={false}
-    contentContainerStyle={{
-      paddingBottom: 40,
-    }}
-  >
-    <View style={styles.card}>
-
-        <Text style={styles.heading}>
-          Create New Trip
-        </Text>
-
-        {/* <TextInput
-          placeholder="Trip Name"
-          placeholderTextColor="#888"
-          value={title}
-          onChangeText={setTitle}
-          style={styles.input}
-        /> */}
-
-        <TextInput
-          placeholder="Destination"
-          placeholderTextColor="#888"
-          value={destination}
-          onChangeText={setDestination}
-          style={styles.input}
-        />
-
-        <TouchableOpacity
-          style={styles.input}
-          onPress={() => {
-            setSelecting("start");
-            setCalendarVisible(true);
-          }}
-        >
-          <Text style={styles.dateText}>
-             Start Date •{" "}
-            {formatDate(startDate)}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.input}
-          onPress={() => {
-            setSelecting("end");
-            setCalendarVisible(true);
-          }}
-        >
-          <Text style={styles.dateText}>
-            End Date •{" "}
-            {formatDate(endDate)}
-          </Text>
-        </TouchableOpacity>
-
-        <TextInput
-          placeholder="Budget ₹"
-          keyboardType="numeric"
-          placeholderTextColor="#888"
-          value={budget}
-          onChangeText={setBudget}
-          style={styles.input}
-        />
-
-        <TouchableOpacity
-  style={styles.uploadButton}
-  onPress={pickImage}
->
-  <Text style={styles.uploadText}>
-    {image
-  ? "📷 Change Selected Image"
-  : "📷 Upload Cover Image"}
-  </Text>
-</TouchableOpacity>
-
-{image && (
-  <>
-    <Image
-      source={{ uri: image }}
-      style={styles.previewImage}
-    />
-
-    <TouchableOpacity
-      style={styles.removeImageButton}
-      onPress={() => setImage(null)}
+    <ImageBackground
+      source={require("../../assets/images/home-bg.png")}
+      style={styles.background}
     >
-      <Text style={styles.removeImageText}>
-        Remove Image
-      </Text>
-    </TouchableOpacity>
-  </>
-)}
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={createTrip}
-        >
-          <Text
-            style={styles.buttonText}
+      <View style={styles.overlayScreen}>
+        <SafeAreaView style={styles.container}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() =>
+              navigation.goBack()
+            }
           >
-            Create Trip
-          </Text>
-        </TouchableOpacity>
+            <Ionicons
+              name="chevron-back"
+              size={24}
+              color="#7C4DFF"
+            />
+          </TouchableOpacity>
+
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../assets/images/logo.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom: 40,
+            }}
+          >
+            <View style={styles.card}>
+              <Text style={styles.heading}>
+                {isEditMode
+                  ? "Edit Trip"
+                  : "Create New Trip"}
+              </Text>
+
+              <TextInput
+                placeholder="Destination"
+                placeholderTextColor="#888"
+                value={destination}
+                onChangeText={setDestination}
+                style={styles.input}
+              />
+
+              <TouchableOpacity
+                style={styles.input}
+                onPress={() => {
+                  setSelecting("start");
+                  setCalendarVisible(true);
+                }}
+              >
+                <Text style={styles.dateText}>
+                  Start Date •{" "}
+                  {formatDate(startDate)}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.input}
+                onPress={() => {
+                  setSelecting("end");
+                  setCalendarVisible(true);
+                }}
+              >
+                <Text style={styles.dateText}>
+                  End Date •{" "}
+                  {formatDate(endDate)}
+                </Text>
+              </TouchableOpacity>
+
+              <TextInput
+                placeholder="Budget ₹"
+                keyboardType="numeric"
+                placeholderTextColor="#888"
+                value={budget}
+                onChangeText={setBudget}
+                style={styles.input}
+              />
+
+              <TouchableOpacity
+                style={styles.uploadButton}
+                onPress={pickImage}
+              >
+                <Text style={styles.uploadText}>
+                  {image || existingImage
+                    ? "📷 Change Selected Image"
+                    : "📷 Upload Cover Image"}
+                </Text>
+              </TouchableOpacity>
+
+              {(image || existingImage) && (
+                <>
+                  <Image
+                    source={{
+                      uri:
+                        image ||
+                        existingImage,
+                    }}
+                    style={styles.previewImage}
+                  />
+
+                  <TouchableOpacity
+                    style={styles.removeImageButton}
+                    onPress={() => {
+                      setImage(null);
+                      setExistingImage(null);
+                    }}
+                  >
+                    <Text
+                      style={styles.removeImageText}
+                    >
+                      Remove Image
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={saveTrip}
+              >
+                <Text
+                  style={styles.buttonText}
+                >
+                  {isEditMode
+                    ? "Update Trip"
+                    : "Create Trip"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+
+          <Modal
+            isVisible={calendarVisible}
+            onBackdropPress={() =>
+              setCalendarVisible(false)
+            }
+          >
+            <View
+              style={styles.calendarContainer}
+            >
+              <Calendar
+                markedDates={{
+                  [selectedDateString]: {
+                    selected: true,
+                    selectedColor:
+                      "#7C4DFF",
+                  },
+                }}
+                onDayPress={(day) => {
+                  const pickedDate =
+                    new Date(
+                      day.dateString
+                    );
+
+                  if (
+                    selecting === "start"
+                  ) {
+                    setStartDate(
+                      pickedDate
+                    );
+                  } else {
+                    setEndDate(
+                      pickedDate
+                    );
+                  }
+
+                  setCalendarVisible(
+                    false
+                  );
+                }}
+                theme={{
+                  todayTextColor:
+                    "#7C4DFF",
+                  arrowColor:
+                    "#7C4DFF",
+                  selectedDayBackgroundColor:
+                    "#7C4DFF",
+                }}
+              />
+            </View>
+          </Modal>
+        </SafeAreaView>
       </View>
-        </ScrollView>
-
-
-      <Modal
-        isVisible={calendarVisible}
-        onBackdropPress={() =>
-          setCalendarVisible(false)
-        }
-      >
-        <View
-          style={styles.calendarContainer}
-        >
-          <Calendar
-            markedDates={{
-              [selectedDateString]: {
-                selected: true,
-                selectedColor:
-                  "#7C4DFF",
-              },
-            }}
-            onDayPress={(day) => {
-              const pickedDate =
-                new Date(
-                  day.dateString
-                );
-
-              if (
-                selecting ===
-                "start"
-              ) {
-                setStartDate(
-                  pickedDate
-                );
-              } else {
-                setEndDate(
-                  pickedDate
-                );
-              }
-
-              setCalendarVisible(
-                false
-              );
-            }}
-            theme={{
-              todayTextColor:
-                "#7C4DFF",
-              arrowColor:
-                "#7C4DFF",
-              selectedDayBackgroundColor:
-                "#7C4DFF",
-            }}
-          />
-        </View>
-      </Modal>
-      
-    </SafeAreaView>
-      </View>
-</ImageBackground>
+    </ImageBackground>
   );
 }
 
@@ -438,14 +570,11 @@ const styles = StyleSheet.create({
     width: width * 0.11,
     height: width * 0.11,
     borderRadius: width * 0.055,
-
     backgroundColor: "rgba(255,255,255,0.95)",
-
     justifyContent: "center",
     alignItems: "center",
-
     marginTop: height * 0.01,
-zIndex: 9999,
+    zIndex: 9999,
     elevation: 3,
   },
 
@@ -457,16 +586,13 @@ zIndex: 9999,
   logo: {
     width: width * 0.5,
     height: width * 0.22,
-    transform:[{scale:2}],
+    transform: [{ scale: 2 }],
   },
 
   card: {
     backgroundColor: "rgba(255,255,255,0.88)",
-
     borderRadius: width * 0.06,
-
     padding: width * 0.055,
-
     elevation: 6,
   },
 
@@ -480,29 +606,15 @@ zIndex: 9999,
 
   input: {
     minHeight: height * 0.07,
-
     backgroundColor: "#FFFFFF",
-
     borderWidth: 1.5,
     borderColor: "#DCEBFF",
-
     borderRadius: width * 0.04,
-
     paddingHorizontal: width * 0.04,
-
     justifyContent: "center",
-
     marginBottom: height * 0.018,
-
     fontSize: width * 0.04,
-
     color: "#1E293B",
-  },
-
-  dateRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: width * 0.02,
   },
 
   dateText: {
@@ -513,16 +625,11 @@ zIndex: 9999,
 
   button: {
     height: height * 0.07,
-
     backgroundColor: "#2563EB",
-
     borderRadius: width * 0.04,
-
     justifyContent: "center",
     alignItems: "center",
-
     marginTop: height * 0.012,
-
     elevation: 6,
   },
 
@@ -541,25 +648,14 @@ zIndex: 9999,
 
   uploadButton: {
     height: height * 0.07,
-
     borderRadius: width * 0.04,
-
     borderWidth: 1.5,
     borderStyle: "dashed",
     borderColor: "#2563EB",
-
     justifyContent: "center",
     alignItems: "center",
-
     marginBottom: height * 0.02,
-
     backgroundColor: "#F8FBFF",
-  },
-
-  uploadContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: width * 0.02,
   },
 
   uploadText: {
@@ -577,13 +673,9 @@ zIndex: 9999,
 
   removeImageButton: {
     backgroundColor: "#FFF1F2",
-
     borderRadius: width * 0.035,
-
     paddingVertical: height * 0.018,
-
     alignItems: "center",
-
     marginBottom: height * 0.02,
   },
 
