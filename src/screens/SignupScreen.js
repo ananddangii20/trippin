@@ -85,15 +85,15 @@ const [username, setUsername] = useState("");
           contentContainerStyle={styles.container}
         >
           <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons
-              name="chevron-back"
-              size={28}
-              color="#222"
-            />
-          </TouchableOpacity>
+  style={styles.backButton}
+  onPress={() => navigation.goBack()}
+>
+  <Ionicons
+    name="chevron-back"
+    size={28}
+    color="#222"
+  />
+</TouchableOpacity>
 
           <Image
             source={require("../../assets/images/logo.png")}
@@ -110,7 +110,7 @@ const [username, setUsername] = useState("");
           </Text>
 
           <View style={styles.form}>
-           <TextInput
+         <TextInput
   style={styles.input}
   value={username}
   onChangeText={(text) =>
@@ -121,25 +121,28 @@ const [username, setUsername] = useState("");
     )
   }
   placeholder="Username"
+  placeholderTextColor="#64748B"
   autoCapitalize="none"
 />
 
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Email"
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
+<TextInput
+  style={styles.input}
+  value={email}
+  onChangeText={setEmail}
+  placeholder="Email"
+  placeholderTextColor="#64748B"
+  autoCapitalize="none"
+  keyboardType="email-address"
+/>
 
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Password"
-              secureTextEntry
-            />
+<TextInput
+  style={styles.input}
+  value={password}
+  onChangeText={setPassword}
+  placeholder="Password"
+  placeholderTextColor="#64748B"
+  secureTextEntry
+/>
 
             {error ? (
               <Text style={styles.error} selectable>

@@ -311,4 +311,37 @@ date: {
     fontWeight: "700",
     marginTop: 3,
   },
+  budgetProgressCard: {
+  marginHorizontal: 20,
+  marginTop: 20,
+  backgroundColor: "#fff",
+  padding: 20,
+  borderRadius: 22,
+
+  shadowColor: "#000",
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+
+  elevation: 4,
+},
+
+bigBudget: {
+  fontSize: 34,
+  fontWeight: "800",
+  color: "#2563EB",
+  marginTop: 5,
+},
+
+payButton: {
+  marginTop: 20,
+  backgroundColor: "#2563EB",
+  paddingVertical: 16,
+  borderRadius: 14,
+  alignItems: "center",
+},
+
 });

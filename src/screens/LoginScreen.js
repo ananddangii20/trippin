@@ -77,16 +77,23 @@ const [identifier, setIdentifier] =
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.container}
         >
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons
-              name="chevron-back"
-              size={28}
-              color="#222"
-            />
-          </TouchableOpacity>
+       <TouchableOpacity
+  onPress={() => navigation.goBack()}
+  activeOpacity={0.7}
+  hitSlop={{
+    top: 15,
+    bottom: 15,
+    left: 15,
+    right: 15,
+  }}
+  style={styles.backButton}
+>
+  <Ionicons
+    name="chevron-back"
+    size={28}
+    color="#222"
+  />
+</TouchableOpacity>
 
           <Image
             source={require("../../assets/images/logo.png")}
@@ -101,21 +108,23 @@ const [identifier, setIdentifier] =
           </Text>
 
           <View style={styles.form}>
-      <TextInput
+  <TextInput
   style={styles.input}
   value={identifier}
   onChangeText={setIdentifier}
   placeholder="Username or Email"
+  placeholderTextColor="#64748B"
   autoCapitalize="none"
 />
 
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Password"
-              secureTextEntry
-            />
+<TextInput
+  style={styles.input}
+  value={password}
+  onChangeText={setPassword}
+  placeholder="Password"
+  placeholderTextColor="#64748B"
+  secureTextEntry
+/>
 
             {error ? (
               <Text style={styles.error} selectable>

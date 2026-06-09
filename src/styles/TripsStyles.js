@@ -17,6 +17,7 @@ export default StyleSheet.create({
 
   container: {
     flex: 1,
+    paddingBottom:50
   },
 
   header: {

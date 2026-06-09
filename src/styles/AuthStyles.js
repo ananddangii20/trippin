@@ -161,11 +161,21 @@ transform:[{scale:1.8}]
     fontWeight: "800",
   },
 
-  backButton: {
-    alignSelf: "flex-start",
-    paddingVertical: height * 0.01,
-    marginBottom: height * 0.01,
-  },
+backButton: {
+  width: 56,
+  height: 56,
+  borderRadius: 28,
+
+  backgroundColor: "rgba(255,255,255,0.9)",
+
+  alignItems: "center",
+  justifyContent: "center",
+
+  alignSelf: "flex-start",
+
+  zIndex: 999,
+  elevation: 999,
+},
 
   authCard: {
     backgroundColor: "rgba(255,255,255,0.35)",

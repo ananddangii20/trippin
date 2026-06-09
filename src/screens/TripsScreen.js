@@ -86,28 +86,34 @@ export default function TripsScreen() {
           >
             {trips.map((trip) => (
               <TripCard
-                key={trip.id}
-                creatorId={trip.userId}
-                tripId={trip.id}
-                destination={trip.destination}
-                date={
-                  trip.startDate && trip.endDate
-                    ? `${new Date(
-                        trip.startDate
-                      ).toLocaleDateString()} - ${new Date(
-                        trip.endDate
-                      ).toLocaleDateString()}`
-                    : "No dates selected"
-                }
-                budget={trip.budget || 0}
-                collected={trip.collected || 0}
-                progress={trip.progress || 0}
-                status={getTripStatus(
-                  trip.startDate,
-                  trip.endDate
-                )}
-                image={trip.coverImage}
-              />
+  key={trip.id}
+  creatorId={trip.userId}
+  tripId={trip.id}
+  destination={trip.destination}
+
+  date={
+    trip.startDate && trip.endDate
+      ? `${new Date(
+          trip.startDate
+        ).toLocaleDateString()} - ${new Date(
+          trip.endDate
+        ).toLocaleDateString()}`
+      : "No dates selected"
+  }
+
+  budget={trip.budget || 0}
+  collected={trip.collected || 0}
+  progress={trip.progress || 0}
+
+  members={trip.members || []}   // <-- ADD
+
+  status={getTripStatus(
+    trip.startDate,
+    trip.endDate
+  )}
+
+  image={trip.coverImage}
+/>
             ))}
           </ScrollView>
 

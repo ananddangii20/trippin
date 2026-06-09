@@ -25,6 +25,7 @@ export default function TripCard({
   budget,
   collected,
   progress,
+  members,
 }) {
   const navigation = useNavigation();
 
@@ -114,6 +115,7 @@ export default function TripCard({
     budget,
     collected,
     progress,
+    members,
   }
 )
       }
